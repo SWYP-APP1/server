@@ -10,6 +10,7 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -50,8 +51,11 @@ public class S3Provider {
      * @param objectKey 객체 키
      * @return 생성된 presigned URL과 NCP URI
      */
-    public PresignedUrlResponse getDownloadPresignedUrl(String objectKey) {
-        String ncpUri = String.format("ncp://%s/%s", bucket, objectKey);
+    public Optional<PresignedUrlResponse> getDownloadPresignedUrl(String ncpUri) {
+        if (ncpUri == null) {
+            return Optional.empty();
+        }
+        String objectKey = getObjectKey(ncpUri);
 
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucket)
@@ -64,10 +68,18 @@ public class S3Provider {
                 .build();
 
         String presignedUrl = s3Presigner.presignGetObject(presignRequest).url().toString();
-        return new PresignedUrlResponse(presignedUrl, ncpUri);
+        return Optional.of(new PresignedUrlResponse(presignedUrl, ncpUri));
     }
 
     private String createObjectKey(String directory) {
         return directory + "/" + UUID.randomUUID().toString();
+    }
+
+    private String getObjectKey(String ncpUri) {
+        String[] parts = ncpUri.split("ncp://")[1].split("/", 2);
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("INVALID_URI_FORMAT");
+        }
+        return parts[1];
     }
 }

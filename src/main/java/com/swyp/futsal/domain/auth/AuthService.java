@@ -58,12 +58,6 @@ public class AuthService {
 
     public TokenResponse refresh(String refreshToken) {
         log.info("Token refresh requested");
-        if (!refreshToken.startsWith("Bearer ")) {
-            log.warn("Invalid token format");
-            throw new IllegalArgumentException("Invalid token format");
-        }
-        refreshToken = refreshToken.substring(7);
-
         if (!jwtTokenProvider.validateToken(refreshToken)) {
             throw new IllegalArgumentException("Invalid refresh token");
         }

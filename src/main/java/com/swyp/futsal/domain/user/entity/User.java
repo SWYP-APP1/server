@@ -47,6 +47,13 @@ public class User extends BaseEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Platform platform;
 
+    @Column(name = "squad_number")
+    private Integer squadNumber;
+
+    @Column(name = "agreement")
+    @Builder.Default
+    private boolean agreement = false;
+
     @Column()
     @Builder.Default
     private boolean notification = false;

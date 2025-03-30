@@ -1,20 +1,19 @@
 package com.swyp.futsal.api.user;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseToken;
-import com.swyp.futsal.api.user.dto.RegisterInfo;
-import com.swyp.futsal.api.user.dto.UserInfo;
+import com.swyp.futsal.api.user.dto.*;
 import com.swyp.futsal.domain.auth.AuthService;
-import com.swyp.futsal.domain.user.entity.User;
 import com.swyp.futsal.domain.user.service.UserService;
+import com.swyp.futsal.provider.PresignedUrlResponse;
 import com.swyp.futsal.security.util.RequestUtil;
 import com.swyp.futsal.util.api.ApiResponse;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,49 +23,60 @@ public class UserController {
   private final AuthService authService;
   private final UserService userService;
 
-  // @PostMapping("")
-  // public ApiResponse<UserInfo> register(@RequestHeader("Authorization") String
-  // authorization,
-  // @RequestBody RegisterInfo registerInfo) {
-
-  // String userId = getUserIdByHeader(authorization);
-  // User registeredUser = userService.register(
-  // userId, registerInfo.getNickname());
-  // return ApiResponse.success(new UserInfo(registeredUser));
-  // }
-
   @GetMapping("/me")
-  public ApiResponse<UserInfo> getUserMe(Authentication authentication) {
-    User customUser = ((User) authentication.getPrincipal());
-    return ApiResponse.success(new UserInfo(customUser));
+  public ApiResponse<UserInfo> getUserMe(
+      @RequestHeader("Authorization") String authorization) {
+    String userId = getUserIdByHeader(authorization);
+    return ApiResponse.success(userService.getUserInfo(userId));
   }
 
-  // @PatchMapping
-  // public ResponseEntity<Void> updateUser(
-  // @LoginUser Long userId,
-  // @RequestBody UpdateUserRequest request) {
-  // userService.updateUser(userId, request);
-  // return ResponseEntity.noContent().build();
-  // }
+  @GetMapping("/check-nickname")
+  public ApiResponse<NicknameCheckResponse> checkNickname(
+      @RequestParam String nickname) {
+    return ApiResponse.success(userService.checkNickname(nickname));
+  }
 
-  // @GetMapping("/check-nickname")
-  // public ResponseEntity<NicknameCheckResponse> checkNickname(
-  // @RequestParam String nickname) {
-  // return ResponseEntity.ok(userService.checkNickname(nickname));
-  // }
+  @PatchMapping("")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public ApiResponse<Void> updateUser(
+      @RequestHeader("Authorization") String authorization,
+      @Valid @RequestBody UpdateUserRequest request) {
+    String userId = getUserIdByHeader(authorization);
+    userService.updateUser(userId, request);
+    return ApiResponse.success(null);
+  }
 
-  // @GetMapping("/profile-presigned-url")
-  // public ResponseEntity<PresignedUrlResponse> getProfilePresignedUrl(
-  // @LoginUser Long userId) {
-  // return ResponseEntity.ok(userService.getProfilePresignedUrl(userId));
-  // }
+  @PatchMapping("/me")
+  public ApiResponse<UserInfo> updateNameAndSquadNumber(
+      @RequestHeader("Authorization") String authorization,
+      @Valid @RequestBody UpdateNameAndSquadNumberRequest request) {
+    String userId = getUserIdByHeader(authorization);
 
-  // @PatchMapping("/profile")
-  // public ResponseEntity<PresignedUrlResponse> updateProfile(
-  // @ Long userId,
-  // @RequestBody UpdateProfileRequest request) {
-  // return ResponseEntity.ok(userService.updateProfile(userId, request));
-  // }
+    return ApiResponse.success(userService.updateNameAndSquadNumber(userId, request));
+  }
+
+  @PatchMapping("/notification")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public ApiResponse<Void> updateNotification(
+      @RequestHeader("Authorization") String authorization) {
+
+    String userId = getUserIdByHeader(authorization);
+    userService.updateNotification(userId);
+    return ApiResponse.success(null);
+  }
+
+  @GetMapping("/profile-presigned-url")
+  public ApiResponse<PresignedUrlResponse> getProfilePresignedUrl() {
+    return ApiResponse.success(userService.getProfilePresignedUrl());
+  }
+
+  @PatchMapping("/profile")
+  public ApiResponse<Optional<PresignedUrlResponse>> updateProfile(
+      @RequestHeader("Authorization") String authorization,
+      @RequestBody UpdateProfileRequest request) {
+    String userId = getUserIdByHeader(authorization);
+    return ApiResponse.success(userService.updateProfile(userId, request.getUri()));
+  }
 
   private String getUserIdByHeader(String authorization) {
     String token = RequestUtil.getAuthorizationToken(authorization);

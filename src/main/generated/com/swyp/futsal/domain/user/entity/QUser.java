@@ -21,6 +21,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final com.swyp.futsal.domain.common.QBaseEntity _super = new com.swyp.futsal.domain.common.QBaseEntity(this);
 
+    public final BooleanPath agreement = createBoolean("agreement");
+
     public final StringPath birthDate = createString("birthDate");
 
     //inherited
@@ -41,6 +43,8 @@ public class QUser extends EntityPathBase<User> {
     public final EnumPath<com.swyp.futsal.domain.common.enums.Platform> platform = createEnum("platform", com.swyp.futsal.domain.common.enums.Platform.class);
 
     public final StringPath profileUri = createString("profileUri");
+
+    public final NumberPath<Integer> squadNumber = createNumber("squadNumber", Integer.class);
 
     public final StringPath uid = createString("uid");
 

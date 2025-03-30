@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -44,7 +45,7 @@ public class TeamController {
     }
 
     @PatchMapping("{teamId}/logo")
-    public ApiResponse<PresignedUrlResponse> updateTeamLogo(
+    public ApiResponse<Optional<PresignedUrlResponse>> updateTeamLogo(
             @PathVariable String teamId,
             @RequestBody Map<String, String> request) {
         return ApiResponse.success(teamService.updateTeamLogoById(teamId, request.get("uri")));
