@@ -1,7 +1,7 @@
 package com.swyp.futsal.config;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.swyp.futsal.domain.user.service.UserService;
+import com.swyp.futsal.domain.user.service.UserSecurityService;
 import com.swyp.futsal.security.filter.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +22,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
   private final FirebaseAuth firebaseAuth;
-  private final UserService userService;
+  private final UserSecurityService userService;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -52,6 +52,5 @@ public class SecurityConfig {
       return configuration;
     };
   }
-
 
 }
