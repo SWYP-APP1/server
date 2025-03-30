@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: futsal
+  profiles:
+    active: ${SPRING_PROFILE_ACTIVE:local}
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+jwt:
+  secret: ${JWT_SECRET_KEY}
+  access-token-validity-in-seconds: 604800 # 7일 (7 * 24 * 60 * 60)
+  refresh-token-validity-in-seconds: 5184000 # 60일 (60 * 24 * 60 * 60)
+
+firebase:
+  credentials:
+    path: ${FIREBASE_CREDENTIALS_PATH}
+
+server:
+  servlet:
+    session:
+      tracking-modes: cookie
+      cookie:
+        same-site: None
+        secure: true
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${NCP_ACCESS_KEY}
+      secret-key: ${NCP_SECRET_KEY}
+    region:
+      static: kr-standard
+    s3:
+      bucket: ${NCP_BUCKET}

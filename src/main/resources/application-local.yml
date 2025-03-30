@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/futsal
+    username: ${MYSQL_USER:local}
+    password: ${MYSQL_PASSWORD:password}
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create
+
+jwt:
+  secretKey: "jwt_secret_key_futsal_abc_123455765432"
+  accessTokenProvideExpirationTime: 120
+
+logging:
+  level:
+    com.swyp: DEBUG
+    org.springframework:
+      web: DEBUG
+      security: DEBUG
+      security.oauth2: DEBUG 
