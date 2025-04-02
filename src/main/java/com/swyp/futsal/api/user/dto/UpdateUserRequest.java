@@ -3,8 +3,6 @@ package com.swyp.futsal.api.user.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 import com.google.firebase.database.annotations.NotNull;
 import com.swyp.futsal.domain.common.enums.Gender;
 

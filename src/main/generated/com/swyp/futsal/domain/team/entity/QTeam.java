@@ -39,6 +39,8 @@ public class QTeam extends EntityPathBase<Team> {
 
     public final StringPath logoUri = createString("logoUri");
 
+    public final EnumPath<com.swyp.futsal.domain.common.enums.MatchType> matchType = createEnum("matchType", com.swyp.futsal.domain.common.enums.MatchType.class);
+
     public final StringPath name = createString("name");
 
     public final StringPath rule = createString("rule");

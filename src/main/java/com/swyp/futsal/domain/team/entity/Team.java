@@ -2,6 +2,7 @@ package com.swyp.futsal.domain.team.entity;
 
 import com.swyp.futsal.domain.common.BaseEntity;
 import com.swyp.futsal.domain.common.enums.TeamRole;
+import com.swyp.futsal.domain.common.enums.MatchType;
 import com.swyp.futsal.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -40,6 +41,10 @@ public class Team extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TeamRole access;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, name = "match_type")
+    private MatchType matchType;
 
     @Column
     private Integer dues;

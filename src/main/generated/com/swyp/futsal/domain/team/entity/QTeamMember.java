@@ -29,6 +29,8 @@ public class QTeamMember extends EntityPathBase<TeamMember> {
 
     public final StringPath id = createString("id");
 
+    public final BooleanPath isDeleted = createBoolean("isDeleted");
+
     public final StringPath name = createString("name");
 
     public final EnumPath<com.swyp.futsal.domain.common.enums.TeamRole> role = createEnum("role", com.swyp.futsal.domain.common.enums.TeamRole.class);

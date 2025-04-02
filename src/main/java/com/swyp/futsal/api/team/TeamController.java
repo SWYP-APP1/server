@@ -1,15 +1,18 @@
 package com.swyp.futsal.api.team;
 
 import com.swyp.futsal.api.team.dto.CreateTeamRequest;
+import com.swyp.futsal.api.team.dto.GetMyTeamResponse;
 import com.swyp.futsal.api.team.dto.TeamResponse;
+import com.swyp.futsal.api.team.dto.UpdateTeamLogoRequest;
+import com.swyp.futsal.domain.auth.AuthService;
 import com.swyp.futsal.domain.team.entity.Team;
 import com.swyp.futsal.domain.team.service.TeamService;
-import com.swyp.futsal.domain.user.entity.User;
+
 import com.swyp.futsal.provider.PresignedUrlResponse;
+import com.swyp.futsal.security.util.RequestUtil;
 import com.swyp.futsal.util.api.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,15 +25,22 @@ import java.util.stream.Collectors;
 @RequestMapping("/teams")
 public class TeamController {
 
+    private final AuthService authService;
     private final TeamService teamService;
 
     @PostMapping("")
     public ApiResponse<TeamResponse> createTeam(
-            Authentication authentication,
+            @RequestHeader("Authorization") String authorization,
             @Valid @RequestBody CreateTeamRequest request) {
-        User user = (User) authentication.getPrincipal();
-        Team team = teamService.createTeam(user, request);
+        String userId = getUserIdByHeader(authorization);
+        Team team = teamService.createTeam(userId, request);
         return ApiResponse.success(new TeamResponse(team));
+    }
+
+    @GetMapping("/me")
+    public ApiResponse<GetMyTeamResponse> getMyTeam(@RequestHeader("Authorization") String authorization) {
+        String userId = getUserIdByHeader(authorization);
+        return ApiResponse.success(teamService.getMyTeam(userId));
     }
 
     @GetMapping("/check-nickname")
@@ -40,16 +50,21 @@ public class TeamController {
     }
 
     @GetMapping("/{teamId}/logo-presigned-url")
-    public ApiResponse<PresignedUrlResponse> getLogoPresignedUrl(@PathVariable String teamId) {
+    public ApiResponse<PresignedUrlResponse> getLogoPresignedUrl(@RequestHeader("Authorization") String authorization, @PathVariable String teamId) {
+        getUserIdByHeader(authorization);
         return ApiResponse.success(teamService.getLogoPresignedUrl(teamId));
     }
 
     @PatchMapping("{teamId}/logo")
     public ApiResponse<Optional<PresignedUrlResponse>> updateTeamLogo(
+            @RequestHeader("Authorization") String authorization,   
             @PathVariable String teamId,
-            @RequestBody Map<String, String> request) {
-        return ApiResponse.success(teamService.updateTeamLogoById(teamId, request.get("uri")));
+            @RequestBody UpdateTeamLogoRequest request) {
+        String userId = getUserIdByHeader(authorization);
+        return ApiResponse.success(teamService.updateTeamLogoById(userId, teamId, request.getUri()));
     }
+
+    
 
     @GetMapping("")
     public ApiResponse<List<TeamResponse>> searchTeams(@RequestParam String name) {
@@ -58,5 +73,10 @@ public class TeamController {
                 .map(TeamResponse::new)
                 .collect(Collectors.toList());
         return ApiResponse.success(responses);
+    }
+
+    private String getUserIdByHeader(String authorization) {
+        String token = RequestUtil.getAuthorizationToken(authorization);
+        return authService.getUserId(token);
     }
 }

@@ -2,6 +2,8 @@ package com.swyp.futsal.domain.team.repository;
 
 import static com.swyp.futsal.domain.team.entity.QTeam.team;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.swyp.futsal.domain.common.enums.MatchType;
+import com.swyp.futsal.domain.common.enums.TeamRole;
 import com.swyp.futsal.domain.team.entity.Team;
 import lombok.RequiredArgsConstructor;
 
@@ -11,6 +13,15 @@ import java.util.List;
 public class TeamRepositoryImpl implements TeamRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+
+    @Override
+    public String insert(String userId, String name, String introduction, String rule, MatchType matchType, TeamRole access, Integer dues) {
+        long result = queryFactory
+                .insert(team)
+                .values(userId, name, introduction, rule, matchType, access, dues)
+                .execute();
+        return String.valueOf(result);
+    }
 
     @Override
     public List<Team> findTeamsByNameContaining(String name) {

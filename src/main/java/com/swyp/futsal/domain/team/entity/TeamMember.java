@@ -23,12 +23,12 @@ public class TeamMember extends BaseEntity {
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", nullable = false)
     private Team team;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column
     private String name;
@@ -43,4 +43,7 @@ public class TeamMember extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TeamRole role;
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
 } 
