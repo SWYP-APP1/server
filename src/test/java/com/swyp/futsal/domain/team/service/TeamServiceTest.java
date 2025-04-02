@@ -65,7 +65,7 @@ class TeamServiceTest {
         given(teamRepository.save(any(Team.class))).willReturn(testTeam);
 
         // when
-        Team result = teamService.createTeam(testUser, createTeamRequest);
+        Team result = teamService.createTeam(testUser.getId(), createTeamRequest);
 
         // then
         assertThat(result).isNotNull();
