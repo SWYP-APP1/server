@@ -42,4 +42,15 @@ public class MatchStats extends BaseEntity {
 
     @Column(name = "history_time", nullable = false)
     private LocalDateTime historyTime;
+
+    @Builder
+    public MatchStats(Match match, MatchParticipant matchParticipant, Integer roundNumber, 
+                     StatType statType, String assistedMatchStatId, LocalDateTime historyTime) {
+        this.match = match;
+        this.matchParticipant = matchParticipant;
+        this.roundNumber = roundNumber;
+        this.statType = statType;
+        this.assistedMatchStatId = assistedMatchStatId;
+        this.historyTime = historyTime;
+    }
 } 

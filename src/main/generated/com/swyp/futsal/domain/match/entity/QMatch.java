@@ -29,7 +29,7 @@ public class QMatch extends EntityPathBase<Match> {
 
     public final StringPath description = createString("description");
 
-    public final DateTimePath<java.time.LocalDateTime> endDate = createDateTime("endDate", java.time.LocalDateTime.class);
+    public final StringPath endTime = createString("endTime");
 
     public final StringPath id = createString("id");
 
@@ -41,7 +41,7 @@ public class QMatch extends EntityPathBase<Match> {
 
     public final NumberPath<Integer> rounds = createNumber("rounds", Integer.class);
 
-    public final DateTimePath<java.time.LocalDateTime> startDate = createDateTime("startDate", java.time.LocalDateTime.class);
+    public final StringPath startTime = createString("startTime");
 
     public final EnumPath<com.swyp.futsal.domain.common.enums.MatchStatus> status = createEnum("status", com.swyp.futsal.domain.common.enums.MatchStatus.class);
 

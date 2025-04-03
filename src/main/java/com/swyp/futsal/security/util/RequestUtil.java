@@ -1,9 +1,6 @@
 package com.swyp.futsal.security.util;
 
-import com.swyp.futsal.provider.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 public class RequestUtil {
 
