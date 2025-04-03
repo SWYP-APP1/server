@@ -23,7 +23,17 @@ public class TeamMemberRepositoryImpl implements TeamMemberRepositoryCustom {
                 .select(teamMember, team)
                 .from(teamMember)
                 .join(teamMember.team, team)
-                .where(teamMember.user.id.eq(userId))
+                .where(teamMember.user.id.eq(userId), teamMember.isDeleted.eq(false))
+                .fetchOne());
+    }
+
+    @Override
+    public Optional<Tuple> findOneWithTeamByUserAndTeamIdAndIsDeletedFalse(String userId, String teamId) {
+        return Optional.ofNullable(queryFactory
+                .select(teamMember, team)
+                .from(teamMember)
+                .join(teamMember.team, team)
+                .where(teamMember.user.id.eq(userId), teamMember.team.id.eq(teamId), teamMember.isDeleted.eq(false))
                 .fetchOne());
     }
 
@@ -31,7 +41,7 @@ public class TeamMemberRepositoryImpl implements TeamMemberRepositoryCustom {
     public Optional<TeamMember> findByUserAndTeamAndIsDeletedFalse(String userId, String teamId) {
         return Optional.ofNullable(queryFactory
                 .selectFrom(teamMember)
-                .where(teamMember.user.id.eq(userId), teamMember.team.id.eq(teamId))
+                .where(teamMember.user.id.eq(userId), teamMember.team.id.eq(teamId), teamMember.isDeleted.eq(false))
                 .fetchOne());
     }
 
@@ -39,7 +49,7 @@ public class TeamMemberRepositoryImpl implements TeamMemberRepositoryCustom {
     public boolean existsByUserAndTeamAndIsDeletedFalse(String userId, String teamId) {
         return queryFactory
                 .selectFrom(teamMember)
-                .where(teamMember.user.id.eq(userId), teamMember.team.id.eq(teamId))
+                .where(teamMember.user.id.eq(userId), teamMember.team.id.eq(teamId), teamMember.isDeleted.eq(false))
                 .fetchOne() != null;
     }
 
@@ -47,7 +57,15 @@ public class TeamMemberRepositoryImpl implements TeamMemberRepositoryCustom {
     public List<TeamMember> findTeamMembersByTeamId(String teamId) {
         return queryFactory
                 .selectFrom(teamMember)
-                .where(teamMember.team.id.eq(teamId))
+                .where(teamMember.team.id.eq(teamId), teamMember.isDeleted.eq(false))
+                .fetch();
+    }
+
+    @Override
+    public List<TeamMember> findTeamMembersByTeamIdAndMemberIds(String teamId, List<String> memberIds) {
+        return queryFactory
+                .selectFrom(teamMember)
+                .where(teamMember.team.id.eq(teamId), teamMember.isDeleted.eq(false), teamMember.id.in(memberIds))
                 .fetch();
     }
 }

@@ -1,10 +1,17 @@
 spring:
   application:
     name: futsal
-  profiles:
-    active: ${SPRING_PROFILE_ACTIVE:local}
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true&autoReconnect=true&failOverReadOnly=false&maxReconnects=10
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      max-lifetime: 580000    
+      idle-timeout: 300000    
+      connection-timeout: 30000  
   jpa:
     properties:
       hibernate:
@@ -47,3 +54,11 @@ cloud:
       static: kr-standard
     s3:
       bucket: ${NCP_BUCKET}
+
+logging:
+  level:
+    com.swyp: DEBUG
+    org.springframework:
+      web: DEBUG
+      security: DEBUG
+      security.oauth2: DEBUG 

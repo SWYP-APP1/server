@@ -1,14 +1,16 @@
 package com.swyp.futsal.domain.user.repository;
 
+import java.util.List;
 import java.util.Optional;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import com.swyp.futsal.api.user.dto.*;
 import com.swyp.futsal.domain.common.enums.Platform;
 import com.swyp.futsal.domain.user.entity.QUser;
 import com.swyp.futsal.domain.user.entity.User;
-
+import com.swyp.futsal.domain.team.entity.QTeamMember;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -16,6 +18,17 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 
   private final JPAQueryFactory jpaQueryFactory;
   private final static QUser qUser = QUser.user;
+  private final static QTeamMember qTeamMember = QTeamMember.teamMember;
+
+  @Override
+  public List<Tuple> findAllWithTeamMemberByTeamMemberIds(List<String> teamMemberIds) {
+    return jpaQueryFactory
+        .select(qUser, qTeamMember)
+        .from(qTeamMember)
+        .innerJoin(qTeamMember.user, qUser)
+        .where(qTeamMember.id.in(teamMemberIds))
+        .fetch();
+  }
 
   @Override
   public Optional<User> findByEmail(String email) {

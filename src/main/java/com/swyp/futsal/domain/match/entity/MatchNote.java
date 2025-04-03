@@ -37,4 +37,8 @@ public class MatchNote extends BaseEntity {
     @CollectionTable(name = "match_note_photos", joinColumns = @JoinColumn(name = "match_note_id"))
     @Column(name = "photo_uri")
     private List<String> photoUris;
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
 } 

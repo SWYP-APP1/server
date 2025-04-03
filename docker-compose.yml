@@ -1,24 +1,4 @@
-version: '3'
 services:
-  mysql-docker:
-    image: mysql:8.0.38
-    container_name: 'swyp-mysql'
-    restart: always
-    ports:
-      - '3306:3306'
-    environment:
-      MYSQL_DATABASE: 'futsal'
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
-      MYSQL_USER: ${MYSQL_USER:-local}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password}
-      TZ: Asia/Seoul
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    volumes:
-      - ./db/mysql/data:/var/lib/mysql
-      - ./initdb:/docker-entrypoint-initdb.d
-
   redis-docker:
     hostname: redis
     restart: always
@@ -35,12 +15,19 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-docker:3306/futsal
-      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-local}
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-password}
       REDIS_HOST: redis-docker
       REDIS_PORT: 6379
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       TZ: Asia/Seoul
+    networks:
+      - app-network
     depends_on:
-      - mysql-docker
       - redis-docker
+
+networks:
+  app-network:
+    driver: bridge

@@ -40,16 +40,17 @@ public class Match extends BaseEntity {
     private MatchType type;
 
     @Column(nullable = false)
-    private Integer rounds;
+    @Builder.Default
+    private Integer rounds = 3;
 
     @Column(name = "match_date", nullable = false)
     private String matchDate;
 
-    @Column(name = "start_date")
-    private LocalDateTime startDate;
+    @Column(name = "start_time")
+    private String startTime;
 
-    @Column(name = "end_date")
-    private LocalDateTime endDate;
+    @Column(name = "end_time")
+    private String endTime;
 
     @Column(nullable = false)
     private String location;
@@ -64,4 +65,16 @@ public class Match extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MatchStatus status;
+
+    public void updateRounds(Integer rounds) {
+        this.rounds = rounds;
+    }
+
+    public void updateVoteStatusToEnded() {
+        this.voteStatus = VoteStatus.ENDED;
+    }
+
+    public void updateStatusToOngoing() {
+        this.status = MatchStatus.ONGOING;
+    }
 }

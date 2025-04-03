@@ -42,16 +42,24 @@ public class MatchParticipant extends BaseEntity {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @Column(nullable = false)
-    private Integer goals;
-
-    @Column(nullable = false)
-    private Integer assists;
-
-    @Column
+    @Column(name = "position")
     private String position;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ParticipationStatus status;
+
+    @Builder
+    public MatchParticipant(String id, Match match, TeamMember teamMember, SubTeam subTeam, String position, ParticipationStatus status) {
+        this.id = id;
+        this.match = match;
+        this.teamMember = teamMember;
+        this.subTeam = subTeam;
+        this.position = position;
+        this.status = status;
+    }
+
+    public void updateSubTeam(SubTeam subTeam) {
+        this.subTeam = subTeam;
+    }
 } 

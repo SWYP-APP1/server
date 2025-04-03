@@ -24,14 +24,10 @@ public class QMatchParticipant extends EntityPathBase<MatchParticipant> {
 
     public final com.swyp.futsal.domain.common.QBaseEntity _super = new com.swyp.futsal.domain.common.QBaseEntity(this);
 
-    public final NumberPath<Integer> assists = createNumber("assists", Integer.class);
-
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdTime = _super.createdTime;
 
     public final DateTimePath<java.time.LocalDateTime> endTime = createDateTime("endTime", java.time.LocalDateTime.class);
-
-    public final NumberPath<Integer> goals = createNumber("goals", Integer.class);
 
     public final StringPath id = createString("id");
 
