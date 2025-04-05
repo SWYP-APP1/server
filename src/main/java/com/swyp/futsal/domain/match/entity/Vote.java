@@ -41,4 +41,8 @@ public class Vote extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "participation_choice")
     private ParticipationStatus participationChoice;
+
+    public void updateParticipationChoice(ParticipationStatus participationChoice) {
+        this.participationChoice = participationChoice;
+    }
 } 

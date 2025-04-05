@@ -3,6 +3,7 @@ package com.swyp.futsal.domain.match.repository;
 import com.swyp.futsal.domain.match.entity.MatchParticipant;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +15,7 @@ public interface MatchParticipantRepository extends JpaRepository<MatchParticipa
     List<MatchParticipant> findAllByMatchId(String matchId);
     @Query("SELECT mp FROM MatchParticipant mp WHERE mp.match.id = :matchId AND mp.teamMember.id != :excludeTeamMemberId")
     List<MatchParticipant> findAllByMatchIdAndTeamMemberIdNot(String matchId, String excludeTeamMemberId);
+
+    @Query("SELECT mp FROM MatchParticipant mp WHERE mp.match.id = :matchId AND mp.teamMember.id = :teamMemberId")
+    Optional<MatchParticipant> findByMatchIdAndTeamMemberId(String matchId, String teamMemberId);
 } 
