@@ -65,7 +65,13 @@ public enum ErrorCode {
     NOT_FOUND_MATCH_NOTE_ID("MATCH-NOTE-001", HttpStatus.NOT_FOUND, 
             "NOT_FOUND_MATCH_NOTE_ID"),
     FORBIDDEN_DELETE_MATCH_NOTE("MATCH-NOTE-002", HttpStatus.FORBIDDEN, 
-            "FORBIDDEN_DELETE_MATCH_NOTE");
+            "FORBIDDEN_DELETE_MATCH_NOTE"),
+
+    // Vote Domain
+    CONFLICT_ALREADY_VOTED("VOTE-001", HttpStatus.CONFLICT, 
+            "CONFLICT_ALREADY_VOTED"),
+    CONFLICT_VOTE_STATUS_ENDED("VOTE-002", HttpStatus.CONFLICT, 
+            "CONFLICT_VOTE_STATUS_ENDED");
 
     private final String code;
     private final HttpStatus httpStatus;

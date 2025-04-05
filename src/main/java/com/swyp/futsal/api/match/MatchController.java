@@ -6,12 +6,17 @@ import com.swyp.futsal.api.match.dto.MatchRoundsUpdateRequest;
 import com.swyp.futsal.api.match.dto.MatchDetailResponse;
 import com.swyp.futsal.domain.auth.AuthService;
 import com.swyp.futsal.domain.match.service.MatchService;
+import com.swyp.futsal.domain.match.service.VoteService;
+import com.swyp.futsal.exception.BusinessException;
+import com.swyp.futsal.exception.ErrorCode;
 import com.swyp.futsal.security.util.RequestUtil;
 import com.swyp.futsal.util.api.ApiResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class MatchController {
     private final AuthService authService;
     private final MatchService matchService;
+    private final VoteService voteService;
 
     @GetMapping
     public ApiResponse<List<MatchResponse>> getMatches(
@@ -36,6 +42,20 @@ public class MatchController {
         String userId = getUserIdByHeader(authorization);
         PageRequest pageRequest = PageRequest.of(page - 1, size);
         return ApiResponse.success(matchService.getMatches(userId, teamId, pageRequest));
+    }
+
+    @GetMapping("/vote")
+    public ApiResponse<List<MatchResponse>> getVoteSchedule(
+            @RequestHeader("Authorization") String authorization,
+            @RequestParam String date) {
+                
+        String userId = getUserIdByHeader(authorization);
+        try{
+            YearMonth yearMonth = YearMonth.parse(date);
+            return ApiResponse.success(voteService.getVoteSchedule(userId, date));
+        } catch (DateTimeParseException e) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST_INVALID_PARAMETER_FORMAT);
+        }
     }
 
     @PostMapping
