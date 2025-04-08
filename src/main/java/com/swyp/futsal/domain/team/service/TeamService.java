@@ -3,6 +3,7 @@ package com.swyp.futsal.domain.team.service;
 import com.querydsl.core.Tuple;
 import com.swyp.futsal.api.team.dto.CreateTeamRequest;
 import com.swyp.futsal.api.team.dto.GetMyTeamResponse;
+import com.swyp.futsal.api.team.dto.TeamMemberInfoResponse;
 import com.swyp.futsal.domain.common.enums.MemberStatus;
 import com.swyp.futsal.domain.common.enums.TeamRole;
 import com.swyp.futsal.domain.team.entity.Team;
@@ -15,6 +16,7 @@ import com.swyp.futsal.provider.S3Provider;
 import com.swyp.futsal.provider.PresignedUrlResponse;
 import com.swyp.futsal.exception.BusinessException;
 import com.swyp.futsal.exception.ErrorCode;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -117,8 +119,70 @@ public class TeamService {
         }
     }
 
+    public TeamMemberInfoResponse getMyTeamMembers(String teamId) {
+        List<Tuple> teamMemberInfo = teamMemberRepository.findTeamMembersInfoByTeamId(teamId);
+        Team team = teamMemberInfo.get(0).get(1, Team.class);
+
+        if (team == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_TEAM_ID);
+        }
+
+        List<TeamMemberInfoResponse.MemberInfo> members = teamMemberInfo.stream()
+            .map(tuple -> {
+                User user = tuple.get(2, User.class);
+                TeamMember teamMember = tuple.get(0, TeamMember.class);
+                MemberStatus status = teamMember.getStatus();
+                TeamRole role = teamMember.getRole();
+
+                return new TeamMemberInfoResponse.MemberInfo(user, status, role);
+            })
+            .toList();
+
+        return new TeamMemberInfoResponse(team, members);
+    }
+
     public List<Team> searchTeams(String name) {
         return teamRepository.findTeamsByNameContaining(name);
+    }
+
+    @Transactional
+    public void updateMemberStatus(String authId, String teamId, String userId, MemberStatus memberStatus) {
+        try {
+            if (!isTeamMemberStatusUpdateAccessible(authId, teamId)) {
+                logger.error("updateTeamLogoById: userId={}, teamId={}", authId, teamId);
+                throw new BusinessException(ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
+            }
+            teamMemberRepository.updateMemberStatus(teamId, userId, memberStatus);
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public void updateRoleTeamMember(String authId, String teamId, String userId, TeamRole newRole) {
+        if (!isTeamMemberStatusUpdateAccessible(authId, teamId)) {
+            logger.error("updateRoleTeamMember: Permission denied for userId={}, teamId={}", authId, teamId);
+            throw new BusinessException(ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
+        }
+        performRoleUpdate(teamId, userId, newRole);
+    }
+
+    @Transactional
+    protected void performRoleUpdate(String teamId, String userId, TeamRole newRole) {
+        TeamMember updateMember = teamMemberRepository.findByUserAndTeamAndIsDeletedFalse(userId, teamId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.FORBIDDEN_ONLY_TEAM_MEMBER_REQUIRED));
+
+        if (updateMember.getRole().equals(newRole)) {
+            return;
+        }
+
+        if (newRole.equals(TeamRole.TEAM_LEADER)) {
+            TeamMember currentLeader = teamMemberRepository.getTeamLeaderByTeamMember(teamId);
+            if (currentLeader != null) {
+                currentLeader.setRole(TeamRole.TEAM_MEMBER);
+            }
+        }
+
+        updateMember.setRole(newRole);
     }
 
     private void createTeamMember(Team team, User user) {
@@ -144,6 +208,12 @@ public class TeamService {
         }
 
         return hasRequiredRole(teamMember.getRole(), team.getAccess());
+    }
+
+    private boolean isTeamMemberStatusUpdateAccessible(String userId, String teamId) {
+        TeamMember teamMember = teamMemberRepository.findByUserAndTeamAndIsDeletedFalse(userId, teamId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.BAD_REQUEST_INVALID_PARAMETER_VALUE));
+      return teamMember.getRole() == TeamRole.OWNER;
     }
 
     private boolean hasRequiredRole(TeamRole memberRole, TeamRole requiredRole) {
