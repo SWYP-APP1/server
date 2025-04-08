@@ -2,9 +2,13 @@ package com.swyp.futsal.api.team;
 
 import com.swyp.futsal.api.team.dto.CreateTeamRequest;
 import com.swyp.futsal.api.team.dto.GetMyTeamResponse;
+import com.swyp.futsal.api.team.dto.TeamMemberInfoResponse;
 import com.swyp.futsal.api.team.dto.TeamResponse;
+import com.swyp.futsal.api.team.dto.TeamRoleRequest;
 import com.swyp.futsal.api.team.dto.UpdateTeamLogoRequest;
 import com.swyp.futsal.domain.auth.AuthService;
+import com.swyp.futsal.domain.common.enums.MemberStatus;
+import com.swyp.futsal.domain.common.enums.TeamRole;
 import com.swyp.futsal.domain.team.entity.Team;
 import com.swyp.futsal.domain.team.service.TeamService;
 
@@ -43,6 +47,12 @@ public class TeamController {
         return ApiResponse.success(teamService.getMyTeam(userId));
     }
 
+    @GetMapping("/team-members")
+    public ApiResponse<TeamMemberInfoResponse> getMyTeamMembers(@RequestHeader("Authorization") String authorization, @RequestParam(name = "team-id") String teamId) {
+//        String userId = getUserIdByHeader(authorization);
+        return ApiResponse.success(teamService.getMyTeamMembers(teamId));
+    }
+
     @GetMapping("/check-nickname")
     public ApiResponse<Map<String, Boolean>> checkNickname(@RequestParam String nickname) {
         boolean isUnique = teamService.isNameUnique(nickname);
@@ -64,7 +74,36 @@ public class TeamController {
         return ApiResponse.success(teamService.updateTeamLogoById(userId, teamId, request.getUri()));
     }
 
-    
+    @PatchMapping("/team-members/{teamId}/{userId}/status/accepted")
+    public ApiResponse<Void> acceptTeamMember(
+        @RequestHeader("Authorization") String authorization,
+        @PathVariable String teamId,
+        @PathVariable String userId) {
+        String authId = getUserIdByHeader(authorization);
+        teamService.updateMemberStatus(authId, teamId, userId, MemberStatus.ACTIVE);
+        return ApiResponse.success(null);
+    }
+
+    @PatchMapping("/team-members/{teamId}/{userId}/status/decliend")
+    public ApiResponse<Void> decliendTeamMember(
+        @RequestHeader("Authorization") String authorization,
+        @PathVariable String teamId,
+        @PathVariable String userId) {
+        String authId = getUserIdByHeader(authorization);
+        teamService.updateMemberStatus(authId, teamId, userId, MemberStatus.PENDING);
+        return ApiResponse.success(null);
+    }
+
+    @PatchMapping("/team-members/{teamId}/{userId}/role")
+    public ApiResponse<Void> updateRoleTeamMember(
+        @RequestHeader("Authorization") String authorization,
+        @PathVariable String teamId,
+        @PathVariable String userId,
+        @RequestBody TeamRoleRequest roleRequest) {
+        String authId = getUserIdByHeader(authorization);
+        teamService.updateRoleTeamMember(authId, teamId, userId, roleRequest.getRole());
+        return ApiResponse.success(null);
+    }
 
     @GetMapping("")
     public ApiResponse<List<TeamResponse>> searchTeams(@RequestParam String name) {
