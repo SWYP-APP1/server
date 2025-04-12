@@ -36,7 +36,7 @@ public class MatchController {
             @RequestHeader("Authorization") String authorization,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(name="team-id") String teamId
+            @RequestParam String teamId
             ) {
 
         String userId = getUserIdByHeader(authorization);

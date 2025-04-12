@@ -22,7 +22,7 @@ public class VoteController {
     @GetMapping
     public ApiResponse<VoteListResponse> getVotes(
             @RequestHeader("Authorization") String authorization,
-            @RequestParam(name = "match-id") String matchId,
+            @RequestParam String matchId,
             @RequestParam VoteType type) {
         String userId = getUserIdByHeader(authorization);
         return ApiResponse.success(voteService.getVotes(userId, matchId, type));

@@ -15,14 +15,16 @@ public class GetMyTeamResponse {
     private String name;
     private Optional<String> logoUrl;
     private TeamRole role;
+    private TeamRole access;
     private LocalDateTime createdTime;
 
-    public GetMyTeamResponse(String id, String teamMemberId, String name, Optional<String> logoUrl, TeamRole role, LocalDateTime createdTime) {
+    public GetMyTeamResponse(String id, String teamMemberId, String name, Optional<String> logoUrl, TeamRole role, TeamRole access, LocalDateTime createdTime) {
         this.id = id;
         this.teamMemberId = teamMemberId;
         this.name = name;
         this.logoUrl = logoUrl;
         this.role = role;
+        this.access = access;
         this.createdTime = createdTime;
     }
 }
