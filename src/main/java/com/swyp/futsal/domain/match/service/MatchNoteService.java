@@ -124,6 +124,6 @@ public class MatchNoteService {
         TeamMember teamMember = tuple.get().get(0, TeamMember.class);
         Team team = tuple.get().get(1, Team.class);
 
-        AccessUtil.hasRequiredRole(teamMember.getRole(), team.getAccess());
+        AccessUtil.hasRequiredRole(teamMember.getId(), Optional.ofNullable(match.getSubstituteTeamMemberId()), teamMember.getRole(), team.getAccess());
     }
 } 

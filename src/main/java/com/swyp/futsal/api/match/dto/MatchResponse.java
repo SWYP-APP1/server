@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 public class MatchResponse {
     private String id;
+    private String substituteTeamMemberId;
     private String opponentTeamName;
     private String description;
     private Integer rounds;
@@ -25,6 +26,7 @@ public class MatchResponse {
     public static MatchResponse from(Match match) {
         MatchResponse response = new MatchResponse();
         response.setId(match.getId());
+        response.setSubstituteTeamMemberId(match.getSubstituteTeamMemberId());
         response.setOpponentTeamName(match.getOpponentTeamName());
         response.setDescription(match.getDescription());
         response.setType(match.getType() != null ? match.getType().name() : null);
