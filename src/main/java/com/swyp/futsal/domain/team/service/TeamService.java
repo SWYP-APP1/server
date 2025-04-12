@@ -4,6 +4,7 @@ import com.querydsl.core.Tuple;
 import com.swyp.futsal.api.team.dto.CreateTeamRequest;
 import com.swyp.futsal.api.team.dto.GetMyTeamResponse;
 import com.swyp.futsal.api.team.dto.TeamMemberInfoResponse;
+import com.swyp.futsal.api.team.dto.TeamSearchResponse;
 import com.swyp.futsal.domain.common.enums.MemberStatus;
 import com.swyp.futsal.domain.common.enums.TeamRole;
 import com.swyp.futsal.domain.team.entity.Team;
@@ -16,7 +17,6 @@ import com.swyp.futsal.provider.S3Provider;
 import com.swyp.futsal.provider.PresignedUrlResponse;
 import com.swyp.futsal.exception.BusinessException;
 import com.swyp.futsal.exception.ErrorCode;
-import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -106,11 +107,11 @@ public class TeamService {
             Team team = tuple.get(1, Team.class);
             
             if (team.getLogoUri() == null) {
-                return new GetMyTeamResponse(team.getId(), teamMember.getId(), team.getName(), null, teamMember.getRole(), teamMember.getCreatedTime());
+                return new GetMyTeamResponse(team.getId(), teamMember.getId(), team.getName(), null, teamMember.getRole(), team.getAccess(), teamMember.getCreatedTime());
             }
             Optional<PresignedUrlResponse> logoUrl = s3Provider.getDownloadPresignedUrl(team.getLogoUri());
             Optional<String> logoUrlString = logoUrl.map(PresignedUrlResponse::getUrl);
-            return new GetMyTeamResponse(team.getId(), teamMember.getId(), team.getName(), logoUrlString, teamMember.getRole(), teamMember.getCreatedTime());
+            return new GetMyTeamResponse(team.getId(), teamMember.getId(), team.getName(), logoUrlString, teamMember.getRole(), team.getAccess(), teamMember.getCreatedTime());
         } catch (Exception e) {
             if (e instanceof BusinessException) {
                 throw e;
@@ -141,8 +142,29 @@ public class TeamService {
         return new TeamMemberInfoResponse(team, members);
     }
 
-    public List<Team> searchTeams(String name) {
-        return teamRepository.findTeamsByNameContaining(name);
+    public List<TeamSearchResponse> searchTeams(String name) {
+        List<Tuple> teams = teamRepository.findAllWithLeaderByNameContaining(name);
+        List<String> teamIds = teams.stream()
+                .map(tuple -> tuple.get(0, Team.class).getId())
+                .collect(Collectors.toList());
+        List<Tuple> teamMemberCounts = teamMemberRepository.countWithTeamIdByTeamIds(teamIds);
+        return teams.stream()
+                .map(tuple -> {
+                    Team team = tuple.get(0, Team.class);
+                    User leader = tuple.get(1, User.class);
+                    return new TeamSearchResponse(
+                        team.getId(),
+                        team.getName(),
+                        leader.getName(),
+                        teamMemberCounts.stream()
+                            .filter(t -> t.get(0, String.class).equals(team.getId()))
+                            .findFirst()
+                            .map(t -> t.get(1, Long.class).intValue())
+                            .orElse(0),
+                        team.getCreatedTime()
+                    );
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional

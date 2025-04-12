@@ -1,10 +1,11 @@
 package com.swyp.futsal.domain.team.repository;
 
 import static com.swyp.futsal.domain.team.entity.QTeam.team;
+import static com.swyp.futsal.domain.user.entity.QUser.user;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.querydsl.core.Tuple;
 import com.swyp.futsal.domain.common.enums.MatchType;
 import com.swyp.futsal.domain.common.enums.TeamRole;
-import com.swyp.futsal.domain.team.entity.Team;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -24,9 +25,11 @@ public class TeamRepositoryImpl implements TeamRepositoryCustom {
     }
 
     @Override
-    public List<Team> findTeamsByNameContaining(String name) {
+    public List<Tuple> findAllWithLeaderByNameContaining(String name) {
         return queryFactory
-                .selectFrom(team)
+                .select(team, user)
+                .from(team)
+                .join(team.user, user)
                 .where(team.name.containsIgnoreCase(name))
                 .orderBy(team.name.asc())
                 .fetch();

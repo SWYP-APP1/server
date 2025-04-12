@@ -5,6 +5,7 @@ import com.swyp.futsal.api.team.dto.GetMyTeamResponse;
 import com.swyp.futsal.api.team.dto.TeamMemberInfoResponse;
 import com.swyp.futsal.api.team.dto.TeamResponse;
 import com.swyp.futsal.api.team.dto.TeamRoleRequest;
+import com.swyp.futsal.api.team.dto.TeamSearchResponse;
 import com.swyp.futsal.api.team.dto.UpdateTeamLogoRequest;
 import com.swyp.futsal.domain.auth.AuthService;
 import com.swyp.futsal.domain.common.enums.MemberStatus;
@@ -22,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -59,8 +59,8 @@ public class TeamController {
         return ApiResponse.success(Map.of("unique", isUnique));
     }
 
-    @GetMapping("/{teamId}/logo-presigned-url")
-    public ApiResponse<PresignedUrlResponse> getLogoPresignedUrl(@RequestHeader("Authorization") String authorization, @PathVariable String teamId) {
+    @GetMapping("/presigned-url")
+    public ApiResponse<PresignedUrlResponse> getLogoPresignedUrl(@RequestHeader("Authorization") String authorization, @RequestParam String teamId) {
         getUserIdByHeader(authorization);
         return ApiResponse.success(teamService.getLogoPresignedUrl(teamId));
     }
@@ -106,11 +106,8 @@ public class TeamController {
     }
 
     @GetMapping("")
-    public ApiResponse<List<TeamResponse>> searchTeams(@RequestParam String name) {
-        List<Team> teams = teamService.searchTeams(name);
-        List<TeamResponse> responses = teams.stream()
-                .map(TeamResponse::new)
-                .collect(Collectors.toList());
+    public ApiResponse<List<TeamSearchResponse>> searchTeams(@RequestParam String name) {
+        List<TeamSearchResponse> responses = teamService.searchTeams(name);
         return ApiResponse.success(responses);
     }
 

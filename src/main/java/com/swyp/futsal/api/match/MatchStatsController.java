@@ -21,7 +21,7 @@ public class MatchStatsController {
     @GetMapping
     public ApiResponse<MatchStatsListResponse> getMatchStats(
             @RequestHeader("Authorization") String authorization,
-            @RequestParam(name = "match-id") String matchId) {
+            @RequestParam String matchId) {
         String userId = getUserIdByHeader(authorization);
         return ApiResponse.success(matchStatsService.getMatchStats(userId, matchId));
     }

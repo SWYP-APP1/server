@@ -20,7 +20,7 @@ public class MatchNoteController {
     @GetMapping("/presigned-url")
     public ApiResponse<MatchNotePresignedUrlResponse> getPresignedUrl(
             @RequestHeader("Authorization") String authorization,
-            @RequestParam(name = "match-id") String matchId) {
+            @RequestParam String matchId) {
         String userId = getUserIdByHeader(authorization);
         return ApiResponse.success(matchNoteService.getPresignedUrl(userId, matchId));
     }
@@ -36,7 +36,7 @@ public class MatchNoteController {
     @GetMapping("/one")
     public ApiResponse<MatchNoteResponse> getMatchNote(
             @RequestHeader("Authorization") String authorization,
-            @RequestParam(name = "match-id") String matchId) {
+            @RequestParam String matchId) {
         String userId = getUserIdByHeader(authorization);
         return ApiResponse.success(matchNoteService.getMatchNote(userId, matchId));
     }
