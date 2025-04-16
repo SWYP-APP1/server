@@ -110,10 +110,14 @@ jobs:
             if ! type java > /dev/null 2>&1; then
               sudo apt-get install -y openjdk-17-jre-headless
             fi
-            export $(cat ~/.env | xargs) &&
             sudo fuser -k 8080/tcp || true; \
             sudo chmod 644 ${{ secrets.FIREBASE_CREDENTIALS_PATH }}; \
-            sudo nohup java -Duser.timezone="Asia/Seoul" \
+          
+            set -a
+            source ~/.env
+            set +a
+      
+            env $(cat ~/.env | xargs) sudo nohup java -Duser.timezone="Asia/Seoul" \
             -jar ~/app/futsal-application.jar  \
             --spring.profiles.active=${{ secrets.SPRING_PROFILE_ACTIVE }} \
             --spring.datasource.password=${{ secrets.MYSQL_PASSWORD }} > ~/app/deploy.log 2>&1 &
