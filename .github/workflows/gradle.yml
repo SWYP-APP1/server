@@ -110,11 +110,17 @@ jobs:
             if ! type java > /dev/null 2>&1; then
               sudo apt-get install -y openjdk-17-jre-headless
             fi
+            export $(cat ~/.env | xargs) &&
             sudo fuser -k 8080/tcp || true; \
             sudo chmod 644 ${{ secrets.FIREBASE_CREDENTIALS_PATH }}; \
             sudo nohup java -Duser.timezone="Asia/Seoul" \
             -jar ~/app/futsal-application.jar  \
             --spring.profiles.active=${{ secrets.SPRING_PROFILE_ACTIVE }} \
             --spring.datasource.password=${{ secrets.MYSQL_PASSWORD }} > ~/app/deploy.log 2>&1 &
+        
+            sleep 5
+            echo '✅ MYSQL_HOST='$MYSQL_HOST >> ~/app/deploy.log
+            echo '✅ MYSQL_PORT='$MYSQL_PORT >> ~/app/deploy.log
+            echo '✅ REDIS_HOST='$REDIS_HOST >> ~/app/deploy.log
           "
 
