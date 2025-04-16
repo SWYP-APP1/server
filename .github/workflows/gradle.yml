@@ -100,6 +100,10 @@ jobs:
           name: firebaseKey.json
           json: ${{ secrets.FIREBASE_KEY_JSON }}
 
+      - name: Copy .env to ~/app
+        run: |
+          scp -o StrictHostKeyChecking=no .env ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:~/app/.env
+
       - name: Upload firebaseKey.json to server
         run: |
           scp -o StrictHostKeyChecking=no firebaseKey.json ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.FIREBASE_CREDENTIALS_PATH }}
@@ -112,19 +116,9 @@ jobs:
             fi
             sudo fuser -k 8080/tcp || true; \
             sudo chmod 644 ${{ secrets.FIREBASE_CREDENTIALS_PATH }}; \
-          
-            set -a
-            source ~/.env
-            set +a
-      
-            env $(cat ~/.env | xargs) sudo nohup java -Duser.timezone="Asia/Seoul" \
+            sudo nohup java -Duser.timezone="Asia/Seoul" \
             -jar ~/app/futsal-application.jar  \
             --spring.profiles.active=${{ secrets.SPRING_PROFILE_ACTIVE }} \
             --spring.datasource.password=${{ secrets.MYSQL_PASSWORD }} > ~/app/deploy.log 2>&1 &
-        
-            sleep 5
-            echo '✅ MYSQL_HOST='$MYSQL_HOST >> ~/app/deploy.log
-            echo '✅ MYSQL_PORT='$MYSQL_PORT >> ~/app/deploy.log
-            echo '✅ REDIS_HOST='$REDIS_HOST >> ~/app/deploy.log
           "
 
