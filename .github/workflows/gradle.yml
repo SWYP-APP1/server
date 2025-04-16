@@ -63,9 +63,21 @@ jobs:
           echo "MYSQL_URL=${{ secrets.MYSQL_URL }}" >> .env
           echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+          echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
+          echo "MYSQL_HOST=${{ secrets.MYSQL_HOST }}" >> .env
+          echo "MYSQL_PORT=${{ secrets.MYSQL_PORT }}" >> .env
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
           echo "HOST_PRIVATE_IP=${{ secrets.HOST_PRIVATE_IP }}" >> .env
           echo "SERVER_NAME=${{ secrets.SERVER_NAME }}" >> .env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
+          echo "FIREBASE_CREDENTIALS_PATH=${{ secrets.FIREBASE_CREDENTIALS_PATH }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "NCP_ACCESS_KEY=${{ secrets.NCP_ACCESS_KEY }}" >> .env
+          echo "NCP_SECRET_KEY=${{ secrets.NCP_SECRET_KEY }}" >> .env
+          echo "NCP_BUCKET=${{ secrets.NCP_BUCKET }}" >> .env
+          
+          
 
       - name: Copy Docker Compose and configurations
         run: |
@@ -90,7 +102,7 @@ jobs:
 
       - name: Upload firebaseKey.json to server
         run: |
-          scp -o StrictHostKeyChecking=no firebaseKey.json ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/futsal/app/config/firebaseKey.json
+          scp -o StrictHostKeyChecking=no firebaseKey.json ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.FIREBASE_CREDENTIALS_PATH }}
 
       - name: Restart application
         run: |
@@ -99,15 +111,10 @@ jobs:
               sudo apt-get install -y openjdk-17-jre-headless
             fi
             sudo fuser -k 8080/tcp || true; \
-            sudo chmod 644 /home/futsal/app/config/firebaseKey.json; \
+            sudo chmod 644 ${{ secrets.FIREBASE_CREDENTIALS_PATH }}; \
             sudo nohup java -Duser.timezone="Asia/Seoul" \
-            -DGOOGLE_APPLICATION_CREDENTIALS='/home/futsal/app/config/firebaseKey.json' \
             -jar ~/app/futsal-application.jar  \
             --spring.profiles.active=${{ secrets.SPRING_PROFILE_ACTIVE }} \
-            --spring.data.redis.host=${{ secrets.REDIS_HOST }} \
-            --spring.data.redis.port=${{ secrets.REDIS_PORT }} \
-            --spring.datasource.url=${{ secrets.MYSQL_URL }} \
-            --spring.datasource.username=${{ secrets.MYSQL_USER }} \
             --spring.datasource.password=${{ secrets.MYSQL_PASSWORD }} > ~/app/deploy.log 2>&1 &
           "
 
