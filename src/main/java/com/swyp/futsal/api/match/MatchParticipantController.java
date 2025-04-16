@@ -22,7 +22,7 @@ public class MatchParticipantController {
     @GetMapping
     public ApiResponse<MatchParticipantListResponse> getMatchParticipants(
             @RequestHeader("Authorization") String authorization,
-            @RequestParam(name = "match-id") String matchId) {
+            @RequestParam String matchId) {
         String userId = getUserIdByHeader(authorization);
         return ApiResponse.success(matchParticipantService.getMatchParticipants(userId, matchId));
     }
@@ -64,7 +64,7 @@ public class MatchParticipantController {
     @GetMapping("/mom")
     public ApiResponse<MatchParticipantMomResponse> getMomCandidates(
             @RequestHeader("Authorization") String authorization,
-            @RequestParam(name = "match-id") String matchId) {
+            @RequestParam String matchId) {
         String userId = getUserIdByHeader(authorization);
         return ApiResponse.success(matchParticipantService.getMomCandidates(userId, matchId));
     }

@@ -19,4 +19,5 @@ public interface TeamMemberRepositoryCustom {
     void updateMemberStatus(String teamId, String userId, MemberStatus memberStatus);
     void updateRoleTeamMember(String teamId, String userId, TeamRole role);
     TeamMember getTeamLeaderByTeamMember(String teamId);
+    List<Tuple> countWithTeamIdByTeamIds(List<String> teamIds);
 }

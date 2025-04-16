@@ -65,7 +65,7 @@ public class MatchService {
         TeamMember teamMember = tuple.get(0, TeamMember.class);
         Team team = tuple.get(1, Team.class);
 
-        if (!AccessUtil.hasRequiredRole(teamMember.getRole(), team.getAccess())) {
+        if (!AccessUtil.hasRequiredRole(teamMember.getId(), null, teamMember.getRole(), team.getAccess())) {
             logger.error("createMatch: userId={}, request={}, error={}", userId, request, ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
             throw new BusinessException(ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
         }
@@ -96,7 +96,7 @@ public class MatchService {
         TeamMember teamMember = tuple.get(0, TeamMember.class);
         Team team = tuple.get(1, Team.class);
         
-        if (!AccessUtil.hasRequiredRole(teamMember.getRole(), team.getAccess())) {
+        if (!AccessUtil.hasRequiredRole(teamMember.getId(), null, teamMember.getRole(), team.getAccess())) {
             logger.error("User does not have permission to delete match: id={}, userId={}, error={}", id, userId, ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
             throw new BusinessException(ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
         }
@@ -150,7 +150,7 @@ public class MatchService {
         TeamMember teamMember = tuple.get(0, TeamMember.class);
         Team team = tuple.get(1, Team.class);
 
-        if (!AccessUtil.hasRequiredRole(teamMember.getRole(), team.getAccess())) {
+        if (!AccessUtil.hasRequiredRole(teamMember.getId(), Optional.ofNullable(match.getSubstituteTeamMemberId()), teamMember.getRole(), team.getAccess())) {
             throw new BusinessException(ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
         }
 

@@ -109,4 +109,14 @@ public class TeamMemberRepositoryImpl implements TeamMemberRepositoryCustom {
             .where(teamMember.role.eq(TeamRole.TEAM_LEADER), teamMember.team.id.eq(teamId))
             .fetchOne();
     }
+
+    @Override
+    public List<Tuple> countWithTeamIdByTeamIds(List<String> teamIds) {
+        return queryFactory
+                .select(teamMember.team.id, teamMember.count())
+                .from(teamMember)
+                .where(teamMember.team.id.in(teamIds))
+                .groupBy(teamMember.team.id)
+                .fetch();
+    }
 }

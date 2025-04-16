@@ -146,7 +146,7 @@ public class MatchParticipantService {
         TeamMember teamMember = teamMemberAndTeam.get().get(0, TeamMember.class);
         Team team = teamMemberAndTeam.get().get(1, Team.class);
 
-        if (!AccessUtil.hasRequiredRole(teamMember.getRole(), team.getAccess())) {
+        if (!AccessUtil.hasRequiredRole(teamMember.getId(), Optional.ofNullable(match.getSubstituteTeamMemberId()), teamMember.getRole(), team.getAccess())) {
             logger.error("Team leader permission required: userId={}, matchId={}", userId, matchId);
             throw new BusinessException(ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
         } 
