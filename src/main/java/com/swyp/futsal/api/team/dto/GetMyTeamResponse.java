@@ -13,15 +13,19 @@ public class GetMyTeamResponse {
     private String id;
     private String teamMemberId;
     private String name;
+    private String introduction;
+    private String rule;
     private Optional<String> logoUrl;
     private TeamRole role;
     private TeamRole access;
     private LocalDateTime createdTime;
 
-    public GetMyTeamResponse(String id, String teamMemberId, String name, Optional<String> logoUrl, TeamRole role, TeamRole access, LocalDateTime createdTime) {
+    public GetMyTeamResponse(String id, String teamMemberId, String name, String introduction, String rule, Optional<String> logoUrl, TeamRole role, TeamRole access, LocalDateTime createdTime) {
         this.id = id;
         this.teamMemberId = teamMemberId;
         this.name = name;
+        this.introduction = introduction;
+        this.rule = rule;
         this.logoUrl = logoUrl;
         this.role = role;
         this.access = access;

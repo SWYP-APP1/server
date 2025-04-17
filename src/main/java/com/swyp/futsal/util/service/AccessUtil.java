@@ -6,6 +6,10 @@ import com.swyp.futsal.domain.common.enums.TeamRole;
 
 public class AccessUtil {
     public static boolean hasRequiredRole(String requestedTeamMemberId, Optional<String> substituteTeamMemberId, TeamRole memberRole, TeamRole requiredRole) {
+        if (substituteTeamMemberId == null) {
+            substituteTeamMemberId = Optional.empty();
+        }
+        
         if (substituteTeamMemberId.isPresent() && substituteTeamMemberId.get().equals(requestedTeamMemberId)) {
             return true;
         }

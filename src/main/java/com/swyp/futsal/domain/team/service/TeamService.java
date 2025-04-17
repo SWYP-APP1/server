@@ -107,11 +107,11 @@ public class TeamService {
             Team team = tuple.get(1, Team.class);
             
             if (team.getLogoUri() == null) {
-                return new GetMyTeamResponse(team.getId(), teamMember.getId(), team.getName(), null, teamMember.getRole(), team.getAccess(), teamMember.getCreatedTime());
+                return new GetMyTeamResponse(team.getId(), teamMember.getId(), team.getName(), team.getIntroduction(), team.getRule(), null, teamMember.getRole(), team.getAccess(), teamMember.getCreatedTime());
             }
             Optional<PresignedUrlResponse> logoUrl = s3Provider.getDownloadPresignedUrl(team.getLogoUri());
             Optional<String> logoUrlString = logoUrl.map(PresignedUrlResponse::getUrl);
-            return new GetMyTeamResponse(team.getId(), teamMember.getId(), team.getName(), logoUrlString, teamMember.getRole(), team.getAccess(), teamMember.getCreatedTime());
+            return new GetMyTeamResponse(team.getId(), teamMember.getId(), team.getName(), team.getIntroduction(), team.getRule(), logoUrlString, teamMember.getRole(), team.getAccess(), teamMember.getCreatedTime());
         } catch (Exception e) {
             if (e instanceof BusinessException) {
                 throw e;
