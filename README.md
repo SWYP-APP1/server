@@ -27,7 +27,7 @@ rm -rf build
 
 docker compose down
 docker compose build
-docker compose up
+docker compose up -d
 ```
 
 ### Docker를 사용한 실행 방법
@@ -114,3 +114,16 @@ docker compose logs app
 ```shell
 docker compose restart app
 ```
+
+### Spring Boot 애플리케이션 실행 방법
+
+```shell
+./gradlew bootRun
+```
+
+# 데이터베이스 컨테이너만 실행
+docker compose up mysql-docker redis-docker -d
+
+# 애플리케이션 빌드 및 실행
+./gradlew build -x test
+./gradlew bootRun

@@ -66,9 +66,8 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
     // AWS SDK 
-    implementation platform('software.amazon.awssdk:bom:2.24.0')
-    implementation 'software.amazon.awssdk:s3'
-    implementation 'software.amazon.awssdk:url-connection-client'
+	implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.529')
+    implementation 'com.amazonaws:aws-java-sdk-s3'
 }
 
 def generated = 'src/main/generated'
