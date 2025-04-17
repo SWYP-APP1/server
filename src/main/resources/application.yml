@@ -55,6 +55,7 @@ cloud:
     region:
       static: kr-standard
     s3:
+      endpoint: https://kr.object.ncloudstorage.com
       bucket: ${NCP_BUCKET}
 
 logging:
