@@ -184,11 +184,12 @@ public class MatchParticipantService {
         logger.info("Convert participants to response format: matchId={}", matchId);
         List<MatchParticipantListResponse.Participant> participantList = new ArrayList<>();
         for (MatchParticipant participant : participants) {
-            User user = users.stream()
+            Tuple userTuple = users.stream()
                     .filter(u -> u.get(1, TeamMember.class).getId().equals(participant.getTeamMember().getId()))
                     .findFirst()
-                    .map(t -> t.get(0, User.class))
                     .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER_ID));
+            User user = userTuple.get(0, User.class);
+            TeamMember member = userTuple.get(1, TeamMember.class);
 
             String profileUrl = null;
             if (user.getProfileUri() != null) {
@@ -196,7 +197,7 @@ public class MatchParticipantService {
                 profileUrl = presignedUrl.map(PresignedUrlResponse::getUrl).orElse(null);
             }
 
-            participantList.add(MatchParticipantListResponse.Participant.from(participant, user, profileUrl));
+            participantList.add(MatchParticipantListResponse.Participant.from(participant, user.getName(), profileUrl, member.getRole()));
         }
 
         // 정렬: A팀(이름순) > B팀(이름순)

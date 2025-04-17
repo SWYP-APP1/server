@@ -1,6 +1,7 @@
 package com.swyp.futsal.api.match.dto;
 
 import com.swyp.futsal.domain.common.enums.SubTeam;
+import com.swyp.futsal.domain.common.enums.TeamRole;
 import com.swyp.futsal.domain.match.entity.MatchParticipant;
 import com.swyp.futsal.domain.user.entity.User;
 import lombok.Builder;
@@ -25,16 +26,18 @@ public class MatchParticipantListResponse {
         private String name;
         private String profileUrl;
         private SubTeam subTeam;
+        private TeamRole role;
         private LocalDateTime createdTime;
 
-        public static Participant from(MatchParticipant participant, User user, String profileUrl) {
+        public static Participant from(MatchParticipant participant, String name, String profileUrl, TeamRole role) {
             return Participant.builder()
                     .id(participant.getId())
                     .matchId(participant.getMatch().getId())
                     .teamMemberId(participant.getTeamMember().getId())
-                    .name(user.getName())
+                    .name(name)
                     .profileUrl(profileUrl)
                     .subTeam(participant.getSubTeam())
+                    .role(role)
                     .createdTime(participant.getCreatedTime())
                     .build();
         }

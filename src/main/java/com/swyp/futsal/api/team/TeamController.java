@@ -9,7 +9,6 @@ import com.swyp.futsal.api.team.dto.TeamSearchResponse;
 import com.swyp.futsal.api.team.dto.UpdateTeamLogoRequest;
 import com.swyp.futsal.domain.auth.AuthService;
 import com.swyp.futsal.domain.common.enums.MemberStatus;
-import com.swyp.futsal.domain.common.enums.TeamRole;
 import com.swyp.futsal.domain.team.entity.Team;
 import com.swyp.futsal.domain.team.service.TeamService;
 
