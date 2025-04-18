@@ -7,7 +7,7 @@ services:
       - 6379:6379
 
   app:
-    build: .
+    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:${ECR_IMAGE_TAG}
     env_file:
       - .env
     container_name: 'swyp-app'
