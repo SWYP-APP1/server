@@ -22,6 +22,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }} # ECR 리포지토리 리전
 
+      - name: Create firebase-adminsdk.json on server
+        uses: jsdaniell/create-json@v1.2.2
+        with:
+          name: firebase-adminsdk.json
+          json: ${{ secrets.FIREBASE_KEY_JSON }}
+
       # 3. Amazon ECR 로그인
       - name: Login to Amazon ECR
         run: |
@@ -52,7 +58,7 @@ jobs:
 
           # docker-compose.yml을 EC2로 전송
           scp -i private_key.pem -o StrictHostKeyChecking=no \
-            docker-compose.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/swyp-app/
+            docker-compose.yml $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/app/
 
           # SSH로 EC2에 접속하여 Docker Compose 실행
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
