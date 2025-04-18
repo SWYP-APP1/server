@@ -14,7 +14,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. AWS CLI 설정
+      # 2. Build the JAR file
+      - name: Build JAR
+        run: |
+          ./gradlew build -x test
+
+      # 3. AWS CLI 설정
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -23,19 +28,26 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }} # ECR 리포지토리 리전
 
       # 3. Amazon ECR 로그인
+      - name: Create firebase-adminsdk.json on server
+        uses: jsdaniell/create-json@v1.2.2
+        with:
+          name: firebase-adminsdk.json
+          json: ${{ secrets.FIREBASE_KEY_JSON }}
+
+      # 4. Amazon ECR 로그인
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
           docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
 
-      # 4. Docker 이미지 빌드 및 푸시
+      # 5. Docker 이미지 빌드 및 푸시
       - name: Build, Tag, and Push Docker Image
         run: |
           docker build --platform linux/amd64 --provenance=false -t ${{ secrets.ECR_REPOSITORY }} .
           docker tag ${{ secrets.ECR_REPOSITORY }}:${{ secrets.ECR_IMAGE_TAG }} ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ secrets.ECR_IMAGE_TAG }}
           docker push ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ secrets.ECR_IMAGE_TAG }}
           
-      # 5. EC2에 배포
+      # 6. EC2에 배포
       - name: Deploy to EC2
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
