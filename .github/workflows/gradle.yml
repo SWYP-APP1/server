@@ -1,8 +1,8 @@
 name: Deploy Spring Boot Application
 
-on:
-  push:
-    branches: [ "main", "stage" ]
+# on:
+#   push:
+#     branches: [ "main" ]
 
 permissions:
   contents: read
@@ -76,7 +76,6 @@ jobs:
           echo "NCP_ACCESS_KEY=${{ secrets.NCP_ACCESS_KEY }}" >> .env
           echo "NCP_SECRET_KEY=${{ secrets.NCP_SECRET_KEY }}" >> .env
           echo "NCP_BUCKET=${{ secrets.NCP_BUCKET }}" >> .env
-          
           
 
       - name: Copy Docker Compose and configurations
