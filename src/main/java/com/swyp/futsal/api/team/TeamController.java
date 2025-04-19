@@ -30,7 +30,7 @@ public class TeamController {
     private final AuthService authService;
     private final TeamService teamService;
 
-    @PostMapping("")
+    @PostMapping
     public ApiResponse<TeamResponse> createTeam(
             @RequestHeader("Authorization") String authorization,
             @Valid @RequestBody CreateTeamRequest request) {
@@ -97,7 +97,7 @@ public class TeamController {
         return ApiResponse.success(null);
     }
 
-    @GetMapping("")
+    @GetMapping
     public ApiResponse<List<TeamSearchResponse>> searchTeams(@RequestParam String name) {
         List<TeamSearchResponse> responses = teamService.searchTeams(name);
         return ApiResponse.success(responses);

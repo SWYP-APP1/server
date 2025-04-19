@@ -18,6 +18,7 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, String>,
     Optional<Tuple> findOneWithTeamByTeamMemberIdAndIsDeletedFalse(String teamMemberId);
     Optional<TeamMember> findByUserAndTeamAndIsDeletedFalse(String userId, String teamId);
     boolean existsByUserAndTeamAndIsDeletedFalse(String userId, String teamId);
+    List<Tuple> findAllWithUserByTeamId(String teamId);
     List<TeamMember> findTeamMembersByTeamId(String teamId);
     List<Tuple> findTeamMembersInfoByTeamId(String teamId);
     List<TeamMember> findTeamMembersByTeamIdAndMemberIds(String teamId, List<String> memberIds);

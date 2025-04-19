@@ -3,7 +3,6 @@ package com.swyp.futsal.domain.team.service;
 import com.querydsl.core.Tuple;
 import com.swyp.futsal.api.team.dto.CreateTeamRequest;
 import com.swyp.futsal.api.team.dto.GetMyTeamResponse;
-import com.swyp.futsal.api.team.dto.TeamMemberInfoResponse;
 import com.swyp.futsal.api.team.dto.TeamSearchResponse;
 import com.swyp.futsal.domain.common.enums.MemberStatus;
 import com.swyp.futsal.domain.common.enums.TeamRole;
@@ -118,28 +117,6 @@ public class TeamService {
             }
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    public TeamMemberInfoResponse getMyTeamMembers(String teamId) {
-        List<Tuple> teamMemberInfo = teamMemberRepository.findTeamMembersInfoByTeamId(teamId);
-        Team team = teamMemberInfo.get(0).get(1, Team.class);
-
-        if (team == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_TEAM_ID);
-        }
-
-        List<TeamMemberInfoResponse.MemberInfo> members = teamMemberInfo.stream()
-            .map(tuple -> {
-                User user = tuple.get(2, User.class);
-                TeamMember teamMember = tuple.get(0, TeamMember.class);
-                MemberStatus status = teamMember.getStatus();
-                TeamRole role = teamMember.getRole();
-
-                return new TeamMemberInfoResponse.MemberInfo(user, status, role);
-            })
-            .toList();
-
-        return new TeamMemberInfoResponse(team, members);
     }
 
     public List<TeamSearchResponse> searchTeams(String name) {
