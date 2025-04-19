@@ -3,7 +3,6 @@ package com.swyp.futsal.api.match.dto;
 import com.swyp.futsal.domain.common.enums.SubTeam;
 import com.swyp.futsal.domain.common.enums.TeamRole;
 import com.swyp.futsal.domain.match.entity.MatchParticipant;
-import com.swyp.futsal.domain.user.entity.User;
 import lombok.Builder;
 import lombok.Getter;
 

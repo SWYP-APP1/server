@@ -42,6 +42,16 @@ public class TeamMemberRepositoryImpl implements TeamMemberRepositoryCustom {
     }
 
     @Override
+    public Optional<Tuple> findOneWithTeamByTeamMemberIdAndIsDeletedFalse(String teamMemberId) {
+        return Optional.ofNullable(queryFactory
+                .select(teamMember, team)
+                .from(teamMember)
+                .join(teamMember.team, team)
+                .where(teamMember.id.eq(teamMemberId), teamMember.isDeleted.eq(false))
+                .fetchOne());
+    }
+
+    @Override
     public Optional<TeamMember> findByUserAndTeamAndIsDeletedFalse(String userId, String teamId) {
         return Optional.ofNullable(queryFactory
                 .selectFrom(teamMember)
