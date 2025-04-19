@@ -1,6 +1,7 @@
 package com.swyp.futsal.domain.team.service;
 
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.querydsl.core.Tuple;
 import com.swyp.futsal.api.team.dto.GetAllTeamMemberResponse;
 import com.swyp.futsal.api.team.dto.GetSubstituteTeamMemberResponse;
+import com.swyp.futsal.domain.common.enums.MemberStatus;
 import com.swyp.futsal.domain.common.enums.TeamRole;
 import com.swyp.futsal.domain.team.entity.Team;
 import com.swyp.futsal.domain.team.entity.TeamMember;
@@ -24,6 +26,7 @@ import com.swyp.futsal.provider.PresignedUrlResponse;
 import com.swyp.futsal.domain.user.entity.User;
 import com.swyp.futsal.domain.user.repository.UserRepository;
 import com.swyp.futsal.provider.S3Provider;
+import com.swyp.futsal.util.service.AccessUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -127,6 +130,7 @@ public class TeamMemberService {
             .build();
     }
 
+    @Transactional
     public void createTeamMember(String userId, String teamId, TeamRole role) {
         logger.info("Create team member by user ID: {}, team ID: {}, role: {}", userId, teamId, role);
 
@@ -149,7 +153,61 @@ public class TeamMemberService {
             .user(user)
             .team(team)
             .role(role)
+            .status(MemberStatus.PENDING)
             .build());
+    }
+
+    @Transactional
+    public void updateMemberStatus(String userId, String requestedTeamMemberId, MemberStatus memberStatus) {
+        Tuple result = teamMemberRepository.findOneWithTeamByUserAndIsDeletedFalse(userId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_TEAM_MEMBER_ID));
+
+        TeamMember teamMember = result.get(0, TeamMember.class);
+        Team team = result.get(1, Team.class);
+        if (!AccessUtil.hasRequiredRole(teamMember.getId(), Optional.empty(), teamMember.getRole(), TeamRole.TEAM_SECRETARY)) {
+            logger.error("updateRoleTeamMember: Permission denied for userId={}, teamId={}", userId, team.getId());
+            throw new BusinessException(ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
+        }
+        
+        logger.info("Update member {} status to {}", requestedTeamMemberId, memberStatus);
+        teamMemberRepository.updateStatusByIdAndRole(requestedTeamMemberId, TeamRole.TEAM_MEMBER, memberStatus);
+    }
+
+    @Transactional
+    public void updateRoleByOwnerIdAndId(String userId, String requestedTeamMemberId, TeamRole newRole) {
+        Tuple result = teamMemberRepository.findOneWithTeamByUserAndIsDeletedFalse(userId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_TEAM_MEMBER_ID));
+
+        TeamMember teamMember = result.get(0, TeamMember.class);
+        Team team = result.get(1, Team.class);
+        if (!Arrays.asList(TeamRole.OWNER, TeamRole.TEAM_LEADER).contains(teamMember.getRole())) {
+            logger.error("updateRoleTeamMember: Permission denied for userId={}, teamId={}", userId, team.getId());
+            throw new BusinessException(ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
+        }
+
+        TeamMember requestedTeamMember = teamMemberRepository.findById(requestedTeamMemberId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_TEAM_MEMBER_ID));
+        
+        if (requestedTeamMember.getRole().equals(TeamRole.OWNER) || requestedTeamMember.getRole().equals(newRole) || newRole.equals(TeamRole.OWNER)) {
+            logger.error("updateRoleTeamMember: Permission denied for userId={}, teamId={} if role is owner", userId, team.getId());
+            return;
+        }
+
+        if (newRole.equals(TeamRole.TEAM_LEADER) || requestedTeamMember.getRole().equals(TeamRole.TEAM_LEADER)) {
+            logger.error("updateRoleTeamMember: Permission denied for userId={}, teamId={} if role is team leader", userId, team.getId());
+            return;
+        }
+
+        if (Arrays.asList(TeamRole.TEAM_DEPUTY_LEADER, TeamRole.TEAM_SECRETARY).contains(newRole)) {
+            logger.info("Change role to team deputy leader or team secretary");
+            Optional<TeamMember> currentTeamMember = teamMemberRepository.findOneByTeamIdAndRole(team.getId(), newRole);
+            if (currentTeamMember.isPresent()) {
+                logger.info("Change role to an existing team member {} into {}", currentTeamMember.get().getRole(), TeamRole.TEAM_MEMBER);
+                teamMemberRepository.updateRoleById(currentTeamMember.get().getId(), TeamRole.TEAM_MEMBER);
+            }
+        }
+
+        teamMemberRepository.updateRoleById(requestedTeamMemberId, newRole);
     }
 
     private Optional<String> getProfileUrl(String profileUri) {

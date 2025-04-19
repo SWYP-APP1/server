@@ -4,9 +4,11 @@ import com.swyp.futsal.api.team.dto.GetAllTeamMemberResponse;
 import com.swyp.futsal.api.team.dto.GetMyTeamMemberResponse;
 import com.swyp.futsal.api.team.dto.GetSubstituteTeamMemberResponse;
 import com.swyp.futsal.api.team.dto.JoinTeamRequest;
+import com.swyp.futsal.api.team.dto.UpdateTeamRoleRequest;
+import com.swyp.futsal.api.team.dto.UpdateTeamMemberStatusRequest;
 import com.swyp.futsal.domain.auth.AuthService;
+import com.swyp.futsal.domain.common.enums.MemberStatus;
 import com.swyp.futsal.domain.common.enums.TeamRole;
-import com.swyp.futsal.domain.team.service.TeamService;
 import com.swyp.futsal.exception.BusinessException;
 import com.swyp.futsal.exception.ErrorCode;
 import com.swyp.futsal.security.util.RequestUtil;
@@ -18,6 +20,9 @@ import com.swyp.futsal.domain.team.service.GetTeamMemberService;
 import com.swyp.futsal.domain.team.service.TeamMemberService;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.Arrays;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -77,6 +82,52 @@ public class TeamMemberController {
     ) {
         String userId = getUserIdByHeader(authorization);
         teamMemberService.createTeamMember(userId, request.getTeamId(), TeamRole.TEAM_MEMBER);
+    }
+
+    @PatchMapping("/{id}/status/accepted")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateTeamMemberStatusAccepted(
+        @RequestHeader("Authorization") String authorization,
+        @PathVariable String id
+    ) {
+        String userId = getUserIdByHeader(authorization);
+        teamMemberService.updateMemberStatus(userId, id, MemberStatus.ACTIVE);
+    }
+
+    @PatchMapping("/{id}/status/declined")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateTeamMemberStatusDeclined(
+        @RequestHeader("Authorization") String authorization,
+        @PathVariable String id
+    ) {
+        String userId = getUserIdByHeader(authorization);
+        teamMemberService.updateMemberStatus(userId, id, MemberStatus.DECLINED);
+    }
+
+    @PatchMapping("/{id}/status")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateTeamMemberStatus(
+        @RequestHeader("Authorization") String authorization,
+        @PathVariable String id,
+        @Valid @RequestBody UpdateTeamMemberStatusRequest request
+    ) {
+        String userId = getUserIdByHeader(authorization);
+        if (Arrays.asList(MemberStatus.ACTIVE, MemberStatus.INACTIVE).contains(request.getStatus())) {
+            teamMemberService.updateMemberStatus(userId, id, request.getStatus());
+        } else {
+            throw new BusinessException(ErrorCode.BAD_REQUEST_INVALID_PARAMETER_VALUE);
+        }
+    }
+
+    @PatchMapping("/{id}/role")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateTeamMemberRole(
+        @RequestHeader("Authorization") String authorization,
+        @PathVariable String id,
+        @Valid @RequestBody UpdateTeamRoleRequest request
+    ) {
+        String userId = getUserIdByHeader(authorization);
+        teamMemberService.updateRoleByOwnerIdAndId(userId, id, request.getRole());
     }
 
     private String getUserIdByHeader(String authorization) {

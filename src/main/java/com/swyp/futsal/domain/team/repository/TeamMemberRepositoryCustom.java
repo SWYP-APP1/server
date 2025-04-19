@@ -13,13 +13,14 @@ public interface TeamMemberRepositoryCustom {
     Optional<Tuple> findOneWithTeamByUserAndTeamIdAndIsDeletedFalse(String userId, String teamId);
     Optional<Tuple> findOneWithTeamByTeamMemberIdAndIsDeletedFalse(String teamMemberId);
     Optional<TeamMember> findByUserAndTeamAndIsDeletedFalse(String userId, String teamId);
+    Optional<TeamMember> findOneByTeamIdAndRole(String teamId, TeamRole role);
     boolean existsByUserAndTeamAndIsDeletedFalse(String userId, String teamId);
     List<Tuple> findAllWithUserByTeamId(String teamId);
     List<TeamMember> findTeamMembersByTeamId(String teamId);
     List<Tuple> findTeamMembersInfoByTeamId(String teamId);
     List<TeamMember> findTeamMembersByTeamIdAndMemberIds(String teamId, List<String> memberIds);
-    void updateMemberStatus(String teamId, String userId, MemberStatus memberStatus);
-    void updateRoleTeamMember(String teamId, String userId, TeamRole role);
+    void updateStatusByIdAndRole(String id, TeamRole role, MemberStatus memberStatus);
+    void updateRoleById(String id, TeamRole role);
     TeamMember getTeamLeaderByTeamMember(String teamId);
     List<Tuple> countWithTeamIdByTeamIds(List<String> teamIds);
 }

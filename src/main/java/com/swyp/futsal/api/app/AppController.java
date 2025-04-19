@@ -21,6 +21,11 @@ public class AppController {
 
   private final AuthService authService;
 
+  @GetMapping
+  public ApiResponse<String> getAppVersion() {
+    return ApiResponse.success("1.0.0");
+  }
+
   @PostMapping("/login")
   public ApiResponse<TokenResponse> login(@Valid @RequestBody LoginRequest request) {
     return ApiResponse.success(authService.login(request));

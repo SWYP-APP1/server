@@ -60,6 +60,14 @@ public class TeamMemberRepositoryImpl implements TeamMemberRepositoryCustom {
     }
 
     @Override
+    public Optional<TeamMember> findOneByTeamIdAndRole(String teamId, TeamRole role) {
+        return Optional.ofNullable(queryFactory
+                .selectFrom(teamMember)
+                .where(teamMember.team.id.eq(teamId), teamMember.role.eq(role), teamMember.isDeleted.eq(false))
+                .fetchOne());
+    }
+
+    @Override
     public boolean existsByUserAndTeamAndIsDeletedFalse(String userId, String teamId) {
         return queryFactory
                 .selectFrom(teamMember)
@@ -105,20 +113,20 @@ public class TeamMemberRepositoryImpl implements TeamMemberRepositoryCustom {
     }
 
     @Override
-    public void updateMemberStatus(String teamId, String userId, MemberStatus memberStatus) {
+    public void updateStatusByIdAndRole(String id, TeamRole role, MemberStatus memberStatus) {
         queryFactory
             .update(teamMember)
             .set(teamMember.status, memberStatus)
-            .where(teamMember.team.id.eq(teamId), teamMember.user.id.eq(userId))
+            .where(teamMember.id.eq(id), teamMember.role.eq(role))
             .execute();
     }
 
     @Override
-    public void updateRoleTeamMember(String teamId, String userId, TeamRole role) {
+    public void updateRoleById(String id, TeamRole role) {
         queryFactory
             .update(teamMember)
             .set(teamMember.role, role)
-            .where(teamMember.team.id.eq(teamId), teamMember.user.id.eq(userId))
+            .where(teamMember.id.eq(id))
             .execute();
     }
 

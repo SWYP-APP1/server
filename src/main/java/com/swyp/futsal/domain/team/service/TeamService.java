@@ -144,46 +144,6 @@ public class TeamService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
-    public void updateMemberStatus(String authId, String teamId, String userId, MemberStatus memberStatus) {
-        try {
-            if (!isTeamMemberStatusUpdateAccessible(authId, teamId)) {
-                logger.error("updateTeamLogoById: userId={}, teamId={}", authId, teamId);
-                throw new BusinessException(ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
-            }
-            teamMemberRepository.updateMemberStatus(teamId, userId, memberStatus);
-        } catch (Exception e) {
-            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public void updateRoleTeamMember(String authId, String teamId, String userId, TeamRole newRole) {
-        if (!isTeamMemberStatusUpdateAccessible(authId, teamId)) {
-            logger.error("updateRoleTeamMember: Permission denied for userId={}, teamId={}", authId, teamId);
-            throw new BusinessException(ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
-        }
-        performRoleUpdate(teamId, userId, newRole);
-    }
-
-    @Transactional
-    protected void performRoleUpdate(String teamId, String userId, TeamRole newRole) {
-        TeamMember updateMember = teamMemberRepository.findByUserAndTeamAndIsDeletedFalse(userId, teamId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.FORBIDDEN_ONLY_TEAM_MEMBER_REQUIRED));
-
-        if (updateMember.getRole().equals(newRole)) {
-            return;
-        }
-
-        if (newRole.equals(TeamRole.TEAM_LEADER)) {
-            TeamMember currentLeader = teamMemberRepository.getTeamLeaderByTeamMember(teamId);
-            if (currentLeader != null) {
-                currentLeader.setRole(TeamRole.TEAM_MEMBER);
-            }
-        }
-
-        updateMember.setRole(newRole);
-    }
-
     private void createTeamMember(Team team, User user) {
         logger.info("createTeamMember: team={}, user={}", team.getId(), user.getId());
         teamMemberRepository.save(TeamMember.builder()
@@ -207,12 +167,6 @@ public class TeamService {
         }
 
         return hasRequiredRole(teamMember.getRole(), team.getAccess());
-    }
-
-    private boolean isTeamMemberStatusUpdateAccessible(String userId, String teamId) {
-        TeamMember teamMember = teamMemberRepository.findByUserAndTeamAndIsDeletedFalse(userId, teamId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.BAD_REQUEST_INVALID_PARAMETER_VALUE));
-      return teamMember.getRole() == TeamRole.OWNER;
     }
 
     private boolean hasRequiredRole(TeamRole memberRole, TeamRole requiredRole) {
