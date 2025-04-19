@@ -45,6 +45,11 @@ public class TeamService {
         try {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER_ID));
+            
+            Optional<Tuple> tuple = teamMemberRepository.findOneWithTeamByUserAndIsDeletedFalse(userId);
+            if (tuple.isPresent()) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST_CANNOT_CREATE_TEAM_WITH_EXISTING_TEAM_MEMBER);
+            }
 
             boolean isExists = teamRepository.existsByName(request.getName());
             if (isExists) {
