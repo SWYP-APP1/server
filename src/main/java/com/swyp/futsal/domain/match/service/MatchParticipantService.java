@@ -128,8 +128,10 @@ public class MatchParticipantService {
 
     private Comparator<CreateMatchParticipantResponse.Participant> compareBySubTeamAndName() {
         return Comparator
-                .comparing(CreateMatchParticipantResponse.Participant::getSubTeam)
-                .thenComparing(p -> p.getName());
+                .comparing(CreateMatchParticipantResponse.Participant::getSubTeam, 
+                          Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(p -> p.getName(), 
+                              Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
     }
 
     private Match validateTeamManagerRole(String userId, String matchId) {

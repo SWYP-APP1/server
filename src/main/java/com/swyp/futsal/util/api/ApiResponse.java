@@ -20,8 +20,8 @@ public class ApiResponse<T> {
         .build();
   }
 
-  public static <T> ApiResponse fail(String code, String message, T data) {
-    return ApiResponse.builder()
+  public static <T> ApiResponse<T> fail(String code, String message, T data) {
+    return ApiResponse.<T>builder()
         .code(code)
         .message(message)
         .data(data)

@@ -14,19 +14,25 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
   @ExceptionHandler(value = { BizException.class })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ApiResponse handleCustomException(BizException ex) {
+  public ApiResponse<Void> handleCustomException(BizException ex) {
     return ApiResponse.fail(ex.getCode(), ex.getMessage(), null);
   }
 
   @ExceptionHandler(value = { CustomSystemException.class })
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public ApiResponse handleCustomException(CustomSystemException ex) {
+  public ApiResponse<Void> handleCustomException(CustomSystemException ex) {
     return ApiResponse.fail(ex.getCode(), ex.getMessage(), null);
+  }
+
+  @ExceptionHandler(value = { BusinessException.class })
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ApiResponse<Void> handleBusinessException(BusinessException ex) {
+    return ApiResponse.fail(ex.getErrorCode().name(), ex.getMessage(), null);
   }
 
   @ExceptionHandler(value = { Exception.class })
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-  public ApiResponse handleException(Exception ex) {
+  public ApiResponse<Void> handleException(Exception ex) {
     log.error("", ex);
     return ApiResponse.fail("ERROR", ex.getMessage(), null);
   }

@@ -3,6 +3,7 @@ package com.swyp.futsal.domain.match.service;
 import com.querydsl.core.Tuple;
 import com.swyp.futsal.api.match.dto.*;
 import com.swyp.futsal.domain.common.enums.StatType;
+import com.swyp.futsal.domain.common.enums.SubTeam;
 import com.swyp.futsal.domain.match.entity.Match;
 import com.swyp.futsal.domain.match.entity.MatchParticipant;
 import com.swyp.futsal.domain.match.entity.MatchStats;
@@ -51,22 +52,58 @@ public class MatchStatsService {
         List<MatchStats> stats = matchStatsRepository
                 .findAllByMatchIdOrderByRoundNumberAscHistoryTimeAsc(matchId);
 
-        Map<Integer, List<MatchStats>> statsByRound = stats.stream()
-                .collect(Collectors.groupingBy(MatchStats::getRoundNumber));
+        // Group stats by round number and team
+        Map<Integer, Map<SubTeam, List<MatchStats>>> statsByRoundAndTeam = stats.stream()
+                .collect(Collectors.groupingBy(
+                    MatchStats::getRoundNumber,
+                    Collectors.groupingBy(stat -> stat.getMatchParticipant().getSubTeam())
+                ));
 
-        logger.info("Organize match stats: userId={}, matchId={}", userId, matchId);
-        List<List<MatchStatsResponse>> organizedStats = new ArrayList<>();
-        for (List<MatchStats> roundStats : statsByRound.values()) {
-            List<MatchStatsResponse> roundResponses = roundStats.stream()
-                    .map(MatchStatsResponse::from)
-                    .collect(Collectors.toList());
-            organizedStats.add(roundResponses);
-        }
+        // Create the response structure
+        Map<Integer, MatchStatsListResponse.RoundStats> organizedStats = new HashMap<>();
+        
+        statsByRoundAndTeam.forEach((roundNumber, teamStats) -> {
+            List<MatchStatsListResponse.RoundStats.GoalAssistPair> teamAPairs = createGoalAssistPairs(teamStats.getOrDefault(SubTeam.A, new ArrayList<>()));
+            List<MatchStatsListResponse.RoundStats.GoalAssistPair> teamBPairs = createGoalAssistPairs(teamStats.getOrDefault(SubTeam.B, new ArrayList<>()));
+            
+            MatchStatsListResponse.RoundStats roundStats = MatchStatsListResponse.RoundStats.builder()
+                    .teamA(teamAPairs)
+                    .teamB(teamBPairs)
+                    .build();
+                    
+            organizedStats.put(roundNumber, roundStats);
+        });
 
         logger.info("Match stats organized: userId={}, matchId={}", userId, matchId);
         return MatchStatsListResponse.builder()
                 .stats(organizedStats)
                 .build();
+    }
+
+    private List<MatchStatsListResponse.RoundStats.GoalAssistPair> createGoalAssistPairs(List<MatchStats> teamStats) {
+        List<MatchStatsListResponse.RoundStats.GoalAssistPair> pairs = new ArrayList<>();
+        
+        // First, create a map of goals and their assists
+        Map<String, MatchStats> assistsByGoalId = teamStats.stream()
+                .filter(stat -> stat.getStatType() == StatType.ASSIST)
+                .collect(Collectors.toMap(
+                    MatchStats::getAssistedMatchStatId,
+                    assist -> assist
+                ));
+
+        // Create pairs for each goal
+        teamStats.stream()
+                .filter(stat -> stat.getStatType() == StatType.GOAL)
+                .sorted(Comparator.comparing(MatchStats::getHistoryTime))
+                .forEach(goal -> {
+                    MatchStats assist = assistsByGoalId.get(goal.getId());
+                    pairs.add(MatchStatsListResponse.RoundStats.GoalAssistPair.builder()
+                            .goal(MatchStatsResponse.from(goal))
+                            .assist(assist != null ? MatchStatsResponse.from(assist) : null)
+                            .build());
+                });
+
+        return pairs;
     }
 
     @Transactional
