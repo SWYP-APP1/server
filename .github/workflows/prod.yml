@@ -80,6 +80,7 @@ jobs:
             # Docker Compose로 컨테이너 실행
             cd app
             docker-compose down
+            docker rmi $(docker images -q)
             docker-compose pull # ECR에서 최신 이미지 가져오기
             docker-compose up -d
           EOF
