@@ -210,6 +210,33 @@ public class TeamMemberService {
         teamMemberRepository.updateRoleById(requestedTeamMemberId, newRole);
     }
 
+    @Transactional
+    public void deleteTeamMember(String userId, String teamMemberId) {
+        Tuple result = teamMemberRepository.findOneWithTeamByUserAndIsDeletedFalse(userId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_TEAM_MEMBER_ID));
+
+        TeamMember teamMember = result.get(0, TeamMember.class);
+        Team team = result.get(1, Team.class);
+
+        if (!AccessUtil.hasRequiredRole(teamMember.getId(), Optional.empty(), teamMember.getRole(), TeamRole.TEAM_SECRETARY)) {
+            logger.error("deleteTeamMember: Permission denied for userId={}, teamId={}", userId, team.getId());
+            throw new BusinessException(ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
+        }
+        
+        TeamMember requestedTeamMember = teamMemberRepository.findById(teamMemberId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_TEAM_MEMBER_ID));
+
+        if (Arrays.asList(TeamRole.OWNER, TeamRole.TEAM_LEADER, TeamRole.TEAM_DEPUTY_LEADER, TeamRole.TEAM_SECRETARY).contains(requestedTeamMember.getRole())) {
+            logger.error("deleteTeamMember: Permission denied for userId={}, teamId={} if role is owner", userId, team.getId());
+            return;
+        }
+        
+        if (requestedTeamMember.getRole().equals(TeamRole.TEAM_MEMBER) && requestedTeamMember.getStatus().equals(MemberStatus.PENDING)) {
+            logger.info("Delete team member");
+            teamMemberRepository.deleteById(teamMemberId);
+        } 
+    }
+
     private Optional<String> getProfileUrl(String profileUri) {
         Optional<PresignedUrlResponse> profileUrl = s3Provider.getDownloadPresignedUrl(profileUri);
         return Optional.ofNullable(profileUrl.map(PresignedUrlResponse::getUrl).orElse(null));

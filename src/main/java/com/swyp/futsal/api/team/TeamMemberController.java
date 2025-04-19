@@ -94,14 +94,14 @@ public class TeamMemberController {
         teamMemberService.updateMemberStatus(userId, id, MemberStatus.ACTIVE);
     }
 
-    @PatchMapping("/{id}/status/declined")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateTeamMemberStatusDeclined(
+    public void deleteTeamMember(
         @RequestHeader("Authorization") String authorization,
         @PathVariable String id
     ) {
         String userId = getUserIdByHeader(authorization);
-        teamMemberService.updateMemberStatus(userId, id, MemberStatus.DECLINED);
+        teamMemberService.deleteTeamMember(userId, id);
     }
 
     @PatchMapping("/{id}/status")
