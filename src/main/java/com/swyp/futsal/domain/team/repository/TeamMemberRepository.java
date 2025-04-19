@@ -15,6 +15,7 @@ import com.querydsl.core.Tuple;
 public interface TeamMemberRepository extends JpaRepository<TeamMember, String>, TeamMemberRepositoryCustom {
     Optional<Tuple> findOneWithTeamByUserAndIsDeletedFalse(String userId);
     Optional<Tuple> findOneWithTeamByUserAndTeamIdAndIsDeletedFalse(String userId, String teamId);
+    Optional<Tuple> findOneWithTeamByTeamMemberIdAndIsDeletedFalse(String teamMemberId);
     Optional<TeamMember> findByUserAndTeamAndIsDeletedFalse(String userId, String teamId);
     boolean existsByUserAndTeamAndIsDeletedFalse(String userId, String teamId);
     List<TeamMember> findTeamMembersByTeamId(String teamId);

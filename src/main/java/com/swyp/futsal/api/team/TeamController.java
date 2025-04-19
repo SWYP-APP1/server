@@ -2,7 +2,6 @@ package com.swyp.futsal.api.team;
 
 import com.swyp.futsal.api.team.dto.CreateTeamRequest;
 import com.swyp.futsal.api.team.dto.GetMyTeamResponse;
-import com.swyp.futsal.api.team.dto.TeamMemberInfoResponse;
 import com.swyp.futsal.api.team.dto.TeamResponse;
 import com.swyp.futsal.api.team.dto.TeamRoleRequest;
 import com.swyp.futsal.api.team.dto.TeamSearchResponse;
@@ -44,12 +43,6 @@ public class TeamController {
     public ApiResponse<GetMyTeamResponse> getMyTeam(@RequestHeader("Authorization") String authorization) {
         String userId = getUserIdByHeader(authorization);
         return ApiResponse.success(teamService.getMyTeam(userId));
-    }
-
-    @GetMapping("/team-members")
-    public ApiResponse<TeamMemberInfoResponse> getMyTeamMembers(@RequestHeader("Authorization") String authorization, @RequestParam(name = "team-id") String teamId) {
-//        String userId = getUserIdByHeader(authorization);
-        return ApiResponse.success(teamService.getMyTeamMembers(teamId));
     }
 
     @GetMapping("/check-nickname")

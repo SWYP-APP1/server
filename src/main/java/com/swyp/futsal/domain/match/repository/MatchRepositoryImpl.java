@@ -31,6 +31,14 @@ public class MatchRepositoryImpl implements MatchRepositoryCustom {
     }
 
     @Override
+    public List<Match> findAllByTeamId(String teamId) {
+        return queryFactory.selectFrom(match)
+            .where(match.team.id.eq(teamId))
+            .orderBy(match.matchDate.desc())
+            .fetch();
+    }
+
+    @Override
     public void updateRoundsById(String id, Integer rounds) {
         queryFactory.update(match)
             .set(match.rounds, rounds)
