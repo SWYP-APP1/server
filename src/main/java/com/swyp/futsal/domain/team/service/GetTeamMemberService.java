@@ -63,8 +63,8 @@ public class GetTeamMemberService {
         return GetMyTeamMemberResponse.builder()
             .id(teamMember.getId())
             .name(user.getName())
-            .birthDate(user.getBirthDate())
-            .generation(calculateGeneration(user.getBirthDate()))
+            .birthDate(Optional.ofNullable(user.getBirthDate()))
+            .generation(user.calculateGeneration())
             .squadNumber(teamMember.getSquadNumber())
             .profileUrl(profileUrlString)
             .team(new GetMyTeamMemberResponse.TeamInfo(team.getId(), team.getName(), teamMember.getRole().name()))
@@ -91,8 +91,8 @@ public class GetTeamMemberService {
         return GetMyTeamMemberResponse.builder()
             .id(teamMember.getId())
             .name(user.getName())
-            .birthDate(user.getBirthDate())
-            .generation(calculateGeneration(user.getBirthDate()))
+            .birthDate(Optional.ofNullable(user.getBirthDate()))
+            .generation(user.calculateGeneration())
             .squadNumber(teamMember.getSquadNumber())
             .profileUrl(profileUrlString)
             .team(new GetMyTeamMemberResponse.TeamInfo(team.getId(), team.getName(), teamMember.getRole().name()))
@@ -153,31 +153,6 @@ public class GetTeamMemberService {
             if (teamBGoals > teamAGoals) return "WIN";
             if (teamBGoals < teamAGoals) return "LOSE";
             return "DRAW";
-        }
-    }
-
-    private String calculateGeneration(String birthDate) {
-        if (birthDate == null) {
-            return null;
-        }
-
-        LocalDate birthLocalDate = LocalDate.parse(birthDate);
-        LocalDate now = LocalDate.now();
-        
-        int age = Period.between(birthLocalDate, now).getYears();
-        
-        if (age >= 20 && age < 30) {
-            return "20대";
-        } else if (age >= 30 && age < 40) {
-            return "30대";
-        } else if (age >= 40 && age < 50) {
-            return "40대";
-        } else if (age >= 50 && age < 60) {
-            return "50대";
-        } else if (age >= 60) {
-            return "60대 이상";
-        } else {
-            return "10대 이하";
         }
     }
 }

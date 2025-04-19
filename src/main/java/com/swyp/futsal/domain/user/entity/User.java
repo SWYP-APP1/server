@@ -11,7 +11,10 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Collection;
+import java.util.Optional;
 
 @Entity
 @Table(name = "user")
@@ -99,5 +102,29 @@ public class User extends BaseEntity implements UserDetails {
     @Override
     public boolean isEnabled() {
         return !isDeleted;
+    }
+
+    public Optional<String> calculateGeneration() {
+        if (birthDate == null) {
+            return Optional.empty();
+        }
+
+        LocalDate birthLocalDate = LocalDate.parse(birthDate);
+        LocalDate now = LocalDate.now();
+        
+        int age = Period.between(birthLocalDate, now).getYears();
+        if (age >= 20 && age < 30) {
+            return Optional.of("20대");
+        } else if (age >= 30 && age < 40) {
+            return Optional.of("30대");
+        } else if (age >= 40 && age < 50) {
+            return Optional.of("40대");
+        } else if (age >= 50 && age < 60) {
+            return Optional.of("50대");
+        } else if (age >= 60) {
+            return Optional.of("60대 이상");
+        } else {
+            return Optional.of("10대 이하");
+        }
     }
 }

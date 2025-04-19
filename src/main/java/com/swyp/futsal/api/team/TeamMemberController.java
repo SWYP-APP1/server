@@ -1,14 +1,24 @@
 package com.swyp.futsal.api.team;
 
+import com.swyp.futsal.api.team.dto.GetAllTeamMemberResponse;
 import com.swyp.futsal.api.team.dto.GetMyTeamMemberResponse;
-import com.swyp.futsal.api.team.dto.TeamMemberInfoResponse;
+import com.swyp.futsal.api.team.dto.GetSubstituteTeamMemberResponse;
+import com.swyp.futsal.api.team.dto.JoinTeamRequest;
 import com.swyp.futsal.domain.auth.AuthService;
+import com.swyp.futsal.domain.common.enums.TeamRole;
 import com.swyp.futsal.domain.team.service.TeamService;
+import com.swyp.futsal.exception.BusinessException;
+import com.swyp.futsal.exception.ErrorCode;
 import com.swyp.futsal.security.util.RequestUtil;
 import com.swyp.futsal.util.api.ApiResponse;
+
+import jakarta.validation.Valid;
+
 import com.swyp.futsal.domain.team.service.GetTeamMemberService;
+import com.swyp.futsal.domain.team.service.TeamMemberService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,8 +26,32 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class TeamMemberController {
     private final AuthService authService;
-    private final TeamService teamService;
+    private final TeamMemberService teamMemberService;
     private final GetTeamMemberService getTeamMemberService;
+
+    @GetMapping
+    public ApiResponse<GetAllTeamMemberResponse> getAllTeamMembers(
+        @RequestHeader("Authorization") String authorization,
+        @Valid @RequestParam(required = true) String teamId) 
+    {
+        if (teamId.length() != 36) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST_INVALID_PARAMETER_VALUE);
+        }
+
+        String userId = getUserIdByHeader(authorization);
+        GetAllTeamMemberResponse response = teamMemberService.getAllTeamMembers(userId, teamId);
+        return ApiResponse.success(response);
+    }
+
+    @GetMapping("/active")
+    public ApiResponse<GetSubstituteTeamMemberResponse> getActiveTeamMembers(
+            @RequestHeader("Authorization") String authorization,
+            @RequestParam(required = true) String name,
+            @RequestParam(required = true) TeamRole role) {
+        String userId = getUserIdByHeader(authorization);
+        GetSubstituteTeamMemberResponse response = teamMemberService.getActiveTeamMembers(userId, name, role);
+        return ApiResponse.success(response);
+    }
 
     @GetMapping("/me")
     public ApiResponse<GetMyTeamMemberResponse> getMyInfo(@RequestHeader("Authorization") String authorization) {
@@ -35,12 +69,14 @@ public class TeamMemberController {
         return ApiResponse.success(response);
     }
 
-    @GetMapping("/team/{teamId}")
-    public ApiResponse<TeamMemberInfoResponse> getMyTeamMembers(
-            @RequestHeader("Authorization") String authorization, 
-            @PathVariable String teamId) {
+    @PostMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void createTeamMember(
+            @RequestHeader("Authorization") String authorization,
+            @Valid @RequestBody JoinTeamRequest request
+    ) {
         String userId = getUserIdByHeader(authorization);
-        return ApiResponse.success(teamService.getMyTeamMembers(teamId));
+        teamMemberService.createTeamMember(userId, request.getTeamId(), TeamRole.TEAM_MEMBER);
     }
 
     private String getUserIdByHeader(String authorization) {

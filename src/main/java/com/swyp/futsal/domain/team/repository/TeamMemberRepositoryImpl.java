@@ -67,6 +67,16 @@ public class TeamMemberRepositoryImpl implements TeamMemberRepositoryCustom {
                 .fetchOne() != null;
     }
 
+    @Override
+    public List<Tuple> findAllWithUserByTeamId(String teamId) {
+        return queryFactory
+                .select(teamMember, user)
+                .from(teamMember)
+                .join(teamMember.user, user)
+                .where(teamMember.team.id.eq(teamId), teamMember.isDeleted.eq(false))
+                .fetch();
+    }
+    
     @Override   
     public List<TeamMember> findTeamMembersByTeamId(String teamId) {
         return queryFactory

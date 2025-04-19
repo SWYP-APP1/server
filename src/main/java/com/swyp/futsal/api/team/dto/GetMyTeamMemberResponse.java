@@ -47,8 +47,8 @@ public class GetMyTeamMemberResponse {
 
     private String id;
     private String name;
-    private String birthDate;
-    private String generation;
+    private Optional<String> birthDate;
+    private Optional<String> generation;
     private Integer squadNumber;
     private Optional<String> profileUrl;
     private LocalDateTime createdTime;
