@@ -8,6 +8,9 @@ import com.swyp.futsal.util.api.ApiResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +27,16 @@ public class MatchStatsController {
             @RequestParam String matchId) {
         String userId = getUserIdByHeader(authorization);
         return ApiResponse.success(matchStatsService.getMatchStats(userId, matchId));
+    }
+
+    @PostMapping("/bulk")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<List<MatchStatsResponse>> createMatchStatsBulk(
+            @RequestHeader("Authorization") String authorization,
+            @Valid @RequestBody MatchStatsCreateBulkRequest request) {
+        String userId = getUserIdByHeader(authorization);
+        List<MatchStatsResponse> stats = matchStatsService.createMatchStatsBulk(userId, request);
+        return ApiResponse.success(stats);
     }
 
     @PostMapping

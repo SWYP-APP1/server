@@ -144,6 +144,92 @@ public class MatchStatsService {
     }
 
     @Transactional
+    public List<MatchStatsResponse> createMatchStatsBulk(String userId, MatchStatsCreateBulkRequest request) {
+        logger.info("Create match stats bulk: userId={}, request={}", userId, request);
+        Match match = matchRepository.findById(request.getMatchId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_MATCH_ID));
+
+        validateTeamManagerRole(userId, match.getId());
+
+        logger.info("Check if all participants are valid");
+        List<String> goalParticipantIds = request.getStats().stream()
+                .map(MatchStatsCreateBulkRequest.MatchStatsCreateRequest::getGoalMatchParticipantId)
+                .collect(Collectors.toList());
+        List<String> assistParticipantIds = request.getStats().stream()
+                .map(MatchStatsCreateBulkRequest.MatchStatsCreateRequest::getAssistMatchParticipantId)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+
+        Set<String> allParticipantIds = new HashSet<>(goalParticipantIds);
+        allParticipantIds.addAll(assistParticipantIds);
+
+        List<MatchParticipant> participants = matchParticipantRepository.findAllById(allParticipantIds);
+        if (participants.size() != allParticipantIds.size()) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_MATCH_PARTICIPANT_ID);
+        }
+
+        // Validate subTeam for each participant
+        for (MatchStatsCreateBulkRequest.MatchStatsCreateRequest stat : request.getStats()) {
+            MatchParticipant goalParticipant = participants.stream()
+                    .filter(p -> p.getId().equals(stat.getGoalMatchParticipantId()))
+                    .findFirst()
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_MATCH_PARTICIPANT_ID));
+
+            if (!goalParticipant.getSubTeam().equals(stat.getSubTeam())) {
+                throw new BusinessException(ErrorCode.BAD_REQUEST_INVALID_SUB_TEAM);
+            }
+
+            if (stat.getAssistMatchParticipantId().isPresent()) {
+                MatchParticipant assistParticipant = participants.stream()
+                        .filter(p -> p.getId().equals(stat.getAssistMatchParticipantId().get()))
+                        .findFirst()
+                        .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_MATCH_PARTICIPANT_ID));
+
+                if (!assistParticipant.getSubTeam().equals(stat.getSubTeam())) {
+                    throw new BusinessException(ErrorCode.BAD_REQUEST_INVALID_SUB_TEAM);
+                }
+            }
+        }
+
+        logger.info("Create match stats bulk: userId={}, request={}", userId, request);
+        List<MatchStatsResponse> stats = new ArrayList<>();
+        for (MatchStatsCreateBulkRequest.MatchStatsCreateRequest stat : request.getStats()) {
+            Optional<MatchParticipant> goalParticipant = participants.stream()
+                    .filter(p -> p.getId().equals(stat.getGoalMatchParticipantId()))
+                    .findFirst();
+            Optional<MatchParticipant> assistParticipant = participants.stream()
+                    .filter(p -> p.getId().equals(stat.getAssistMatchParticipantId().orElse(null)))
+                    .findFirst();
+
+            if (goalParticipant.isPresent()) {
+                MatchStats matchStat = matchStatsRepository.save(MatchStats.builder()
+                    .match(match)
+                    .matchParticipant(goalParticipant.get())
+                    .roundNumber(stat.getRoundNumber())
+                    .statType(StatType.GOAL)
+                    .historyTime(LocalDateTime.now())
+                    .build());
+                stats.add(MatchStatsResponse.from(matchStat));
+                
+                if (assistParticipant.isPresent()) {
+                    MatchStats assistStat = matchStatsRepository.save(MatchStats.builder()
+                        .match(match)
+                        .matchParticipant(assistParticipant.get())
+                        .roundNumber(stat.getRoundNumber())
+                        .statType(StatType.ASSIST)
+                        .assistedMatchStatId(matchStat.getId())
+                        .historyTime(LocalDateTime.now())
+                        .build());
+                    stats.add(MatchStatsResponse.from(assistStat));
+                }
+            }
+        }
+        
+        return stats;
+    }
+
+    @Transactional
     public void deleteMatchStats(String userId, String statId) {
         logger.info("Delete match stats: userId={}, statId={}", userId, statId);
         MatchStats stats = matchStatsRepository.findById(statId)
