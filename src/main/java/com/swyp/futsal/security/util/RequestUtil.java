@@ -9,7 +9,7 @@ public class RequestUtil {
 
   public static String getAuthorizationToken(String header) {
     if (header == null || !header.startsWith("Bearer ")) {
-      throw new BusinessException(ErrorCode.UNAUTHORIZED_TOKEN_AUTHENTICATION_FAILED);
+      throw new BusinessException(ErrorCode.UNAUTHORIZED_HEADER_MISSING);
     }
 
     return header.substring("Bearer ".length());
