@@ -1,9 +1,13 @@
 package com.swyp.futsal.domain.user.service;
 
+import com.querydsl.core.Tuple;
 import com.swyp.futsal.api.user.dto.*;
 import com.swyp.futsal.domain.user.repository.UserRepository;
+import com.swyp.futsal.exception.BusinessException;
 import com.swyp.futsal.exception.ErrorCode;
 import com.swyp.futsal.exception.custom.CustomSystemException;
+import com.swyp.futsal.domain.team.entity.TeamMember;
+import com.swyp.futsal.domain.team.repository.TeamMemberRepository;
 import com.swyp.futsal.domain.user.entity.User;
 import com.swyp.futsal.provider.S3Provider;
 import com.swyp.futsal.provider.PresignedUrlResponse;
@@ -24,6 +28,7 @@ public class UserService {
 
     private final Logger logger = Logger.getLogger(UserService.class.getName());
 
+    private final TeamMemberRepository teamMemberRepository;
     private final UserRepository userRepository;
     private final S3Provider s3Provider;
 
@@ -61,6 +66,13 @@ public class UserService {
         try {
             logger.info("Update user name and squad number: " + userId + " " + request);
             User user = userRepository.updateNameAndSquadNumber(userId, request);
+            if (request.getSquadNumber() != null) {
+                Tuple result = teamMemberRepository.findOneWithTeamByUserAndIsDeletedFalse(userId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER_ID));
+
+                TeamMember teamMember = result.get(0, TeamMember.class);
+                teamMemberRepository.updateSquadNumberById(teamMember.getId(), request.getSquadNumber());
+            }
             Optional<PresignedUrlResponse> profileUrl = s3Provider.getDownloadPresignedUrl(user.getProfileUri());
             return new UserInfo(user, profileUrl.map(PresignedUrlResponse::getUrl));
         } catch (Exception e) {

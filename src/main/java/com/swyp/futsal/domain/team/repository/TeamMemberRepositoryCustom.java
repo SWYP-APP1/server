@@ -21,6 +21,7 @@ public interface TeamMemberRepositoryCustom {
     List<TeamMember> findTeamMembersByTeamIdAndMemberIds(String teamId, List<String> memberIds);
     void updateStatusByIdAndRole(String id, TeamRole role, MemberStatus memberStatus);
     void updateRoleById(String id, TeamRole role);
+    void updateSquadNumberById(String id, Integer squadNumber);
     TeamMember getTeamLeaderByTeamMember(String teamId);
     List<Tuple> countWithTeamIdByTeamIds(List<String> teamIds);
 }

@@ -25,5 +25,6 @@ public interface TeamMemberRepository extends JpaRepository<TeamMember, String>,
     List<TeamMember> findTeamMembersByTeamIdAndMemberIds(String teamId, List<String> memberIds);
     void updateStatusByIdAndRole(String id, TeamRole role, MemberStatus memberStatus);
     void updateRoleById(String id, TeamRole role);
+    void updateSquadNumberById(String id, Integer squadNumber);
     List<Tuple> countWithTeamIdByTeamIds(List<String> teamIds);
 }

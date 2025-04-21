@@ -131,6 +131,15 @@ public class TeamMemberRepositoryImpl implements TeamMemberRepositoryCustom {
     }
 
     @Override
+    public void updateSquadNumberById(String id, Integer squadNumber) {
+        queryFactory
+            .update(teamMember)
+            .set(teamMember.squadNumber, squadNumber)
+            .where(teamMember.id.eq(id))
+            .execute();
+    }
+
+    @Override
     public TeamMember getTeamLeaderByTeamMember(String teamId) {
         return queryFactory
             .selectFrom(teamMember)
