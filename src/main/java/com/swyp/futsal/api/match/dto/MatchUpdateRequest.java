@@ -2,8 +2,6 @@ package com.swyp.futsal.api.match.dto;
 
 import java.util.Optional;
 
-import org.hibernate.validator.constraints.Length;
-
 import com.swyp.futsal.domain.common.annotations.TimeFormat;
 
 import jakarta.validation.constraints.NotNull;

@@ -29,6 +29,7 @@ public class GetAllTeamMemberResponse {
     }
 
     private String teamId;
+    private String name;
     private Optional<String> logoUrl;
     private List<TeamMemberInfo> teamMembers;
 }

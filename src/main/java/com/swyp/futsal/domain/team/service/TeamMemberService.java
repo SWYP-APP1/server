@@ -125,6 +125,7 @@ public class TeamMemberService {
 
         return GetAllTeamMemberResponse.builder()
             .teamId(teamId)
+            .name(team.getName())
             .logoUrl(getProfileUrl(team.getLogoUri()))
             .teamMembers(members)
             .build();
