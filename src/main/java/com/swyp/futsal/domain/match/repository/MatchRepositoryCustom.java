@@ -1,6 +1,7 @@
 package com.swyp.futsal.domain.match.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,4 +18,5 @@ public interface MatchRepositoryCustom {
     void updateRoundsById(String id, Integer rounds);
     void updateVoteStatusById(String id, VoteStatus voteStatus);
     void updateStatusById(String id, MatchStatus matchStatus);
+    Optional<Match> findFirstRecentMatch(String today, String teamId);
 }

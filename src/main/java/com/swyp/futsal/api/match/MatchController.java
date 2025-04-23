@@ -3,6 +3,7 @@ package com.swyp.futsal.api.match;
 import com.swyp.futsal.api.match.dto.MatchCreateRequest;
 import com.swyp.futsal.api.match.dto.MatchResponse;
 import com.swyp.futsal.api.match.dto.MatchRoundsUpdateRequest;
+import com.swyp.futsal.api.match.dto.MatchUpdateRequest;
 import com.swyp.futsal.api.match.dto.MatchDetailResponse;
 import com.swyp.futsal.domain.auth.AuthService;
 import com.swyp.futsal.domain.match.service.MatchService;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -42,6 +44,14 @@ public class MatchController {
         String userId = getUserIdByHeader(authorization);
         PageRequest pageRequest = PageRequest.of(page - 1, size);
         return ApiResponse.success(matchService.getMatches(userId, teamId, pageRequest));
+    }
+
+    @GetMapping("/recent")
+    public ApiResponse<Optional<MatchResponse>> getRecentMatch(
+            @RequestHeader("Authorization") String authorization,
+            @RequestParam String teamId) {
+        String userId = getUserIdByHeader(authorization);
+        return ApiResponse.success(matchService.getRecentMatch(userId, teamId));
     }
 
     @GetMapping("/vote")
@@ -81,6 +91,12 @@ public class MatchController {
         String userId = getUserIdByHeader(authorization);
         matchService.updateRounds(userId, id, request);
         return ApiResponse.success(null);
+    }
+
+    @PatchMapping("/{id}")
+    public ApiResponse<MatchResponse> updateMatch(@RequestHeader("Authorization") String authorization, @PathVariable String id, @Valid @RequestBody MatchUpdateRequest request) {
+        String userId = getUserIdByHeader(authorization);
+        return ApiResponse.success(matchService.updateAllById(userId, id, request));
     }
 
     @GetMapping("/{id}")

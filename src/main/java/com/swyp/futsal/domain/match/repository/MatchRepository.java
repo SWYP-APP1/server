@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MatchRepository extends JpaRepository<Match, String>, MatchRepositoryCustom {
@@ -18,6 +19,7 @@ public interface MatchRepository extends JpaRepository<Match, String>, MatchRepo
     void updateRoundsById(String id, Integer rounds);
     void updateVoteStatusById(String id, VoteStatus voteStatus);
     void updateStatusById(String id, MatchStatus matchStatus);
+    Optional<Match> findFirstRecentMatch(String today, String teamId);
 
     @Query("SELECT m FROM Match m WHERE m.matchDate LIKE :yearMonth% ORDER BY m.matchDate DESC")
     List<Match> findAllByMatchDateStartingWith(String yearMonth);

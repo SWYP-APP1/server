@@ -1,5 +1,7 @@
 package com.swyp.futsal.domain.match.entity;
 
+import java.util.Optional;
+
 import com.swyp.futsal.domain.common.BaseEntity;
 import com.swyp.futsal.domain.common.enums.MatchStatus;
 import com.swyp.futsal.domain.common.enums.MatchType;
@@ -66,6 +68,26 @@ public class Match extends BaseEntity {
 
     public void updateRounds(Integer rounds) {
         this.rounds = rounds;
+    }
+
+    public void updateMatchDate(String matchDate) {
+        this.matchDate = matchDate;
+    }
+
+    public void updateStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public void updateEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
+    public void updateLocation(String location) {
+        this.location = location;
+    }
+
+    public void updateSubstituteTeamMemberId(Optional<String> substituteTeamMemberId) {
+        this.substituteTeamMemberId = substituteTeamMemberId.orElse(null);
     }
 
     public void updateVoteStatusToEnded() {

@@ -1,6 +1,7 @@
 package com.swyp.futsal.domain.match.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -60,5 +61,13 @@ public class MatchRepositoryImpl implements MatchRepositoryCustom {
             .set(match.status, matchStatus)
             .where(match.id.eq(id))
             .execute();
+    }
+
+    @Override
+    public Optional<Match> findFirstRecentMatch(String today, String teamId) {
+        return Optional.ofNullable(queryFactory.selectFrom(match)
+            .where(match.matchDate.loe(today), match.team.id.eq(teamId))
+            .orderBy(match.matchDate.desc())
+            .fetchFirst());
     }
 }

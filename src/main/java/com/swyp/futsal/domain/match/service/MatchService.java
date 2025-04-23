@@ -4,6 +4,7 @@ import com.querydsl.core.Tuple;
 import com.swyp.futsal.api.match.dto.MatchCreateRequest;
 import com.swyp.futsal.api.match.dto.MatchResponse;
 import com.swyp.futsal.api.match.dto.MatchRoundsUpdateRequest;
+import com.swyp.futsal.api.match.dto.MatchUpdateRequest;
 import com.swyp.futsal.api.match.dto.MatchDetailResponse;
 import com.swyp.futsal.domain.common.enums.MatchStatus;
 import com.swyp.futsal.domain.common.enums.VoteStatus;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,6 +79,19 @@ public class MatchService {
         }
 
         return MatchResponse.from(matchRepository.save(request.toMatch(team)));
+    }
+
+    @Transactional
+    public MatchResponse updateAllById(String userId, String id, MatchUpdateRequest request) {
+        Match match = validateTeamManagerRole(userId, id);
+
+        match.updateRounds(request.getRounds());
+        match.updateMatchDate(request.getMatchDate());
+        match.updateStartTime(request.getStartTime());
+        match.updateEndTime(request.getEndTime());
+        match.updateLocation(request.getLocation());
+        match.updateSubstituteTeamMemberId(request.getSubstituteTeamMemberId());
+        return MatchResponse.from(matchRepository.save(match));
     }
 
     @Transactional
@@ -138,6 +153,27 @@ public class MatchService {
         Match match = validateTeamManagerRole(userId, matchId);
         matchRepository.updateStatusById(match.getId(), MatchStatus.ONGOING);
         logger.info("Match status updated to ongoing successfully: matchId={}", matchId);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<MatchResponse> getRecentMatch(String userId, String teamId) {
+        logger.info("getRecentMatch: userId={}, teamId={}", userId, teamId);
+        
+        if (teamId == null) {
+            logger.error("Team ID is null");
+            throw new BusinessException(ErrorCode.BAD_REQUEST_INVALID_PARAMETER_VALUE);
+        }
+
+        // 팀 멤버인지 확인
+        teamMemberRepository.findByUserAndTeamAndIsDeletedFalse(userId, teamId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.FORBIDDEN_ONLY_TEAM_MEMBER_REQUIRED));
+        
+        // 오늘 날짜 (yyyy-MM-dd 형식)
+        String today = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE);
+        
+        // 오늘 이후 날짜 중 가장 가까운 경기 가져오기
+        Optional<Match> match = matchRepository.findFirstRecentMatch(today, teamId);
+        return match.map(MatchResponse::from);
     }
 
     private Match validateTeamManagerRole(String userId, String matchId) {

@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.swyp.futsal.domain.match.entity.Match;
 import com.swyp.futsal.domain.match.entity.MatchParticipant;
 import com.swyp.futsal.domain.match.entity.QMatch;
 import com.swyp.futsal.domain.match.entity.QMatchParticipant;
