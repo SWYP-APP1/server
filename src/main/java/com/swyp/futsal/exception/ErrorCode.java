@@ -54,6 +54,8 @@ public enum ErrorCode {
     // Team Member Domain
     NOT_FOUND_TEAM_MEMBER_ID("TEAM-MEMBER-001", HttpStatus.NOT_FOUND, 
             "NOT_FOUND_TEAM_MEMBER_ID"),
+    UNAUTHORIZED_TO_REMOVE_TEAM_MEMBER("TEAM-MEMBER-002", HttpStatus.UNAUTHORIZED,
+            "UNAUTHORIZED_TO_REMOVE_TEAM_MEMBER"),
 
     // Match Domain
     NOT_FOUND_MATCH_ID("MATCH-001", HttpStatus.NOT_FOUND, 

@@ -23,6 +23,7 @@ public class GetAllTeamMemberResponse {
         private Optional<String> birthDate;
         private Optional<String> generation;
         private Optional<String> profileUrl;
+        private Optional<Integer> squadNumber;
         private Gender gender;
         private MemberStatus status;
         private LocalDateTime createdTime;

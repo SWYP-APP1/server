@@ -117,12 +117,12 @@ public class MatchParticipantService {
         if (profileUri.isPresent()) {
             Optional<PresignedUrlResponse> profileUrl = s3Provider.getDownloadPresignedUrl(profileUri.get());
             if (profileUrl.isPresent()) {
-                return CreateMatchParticipantResponse.Participant.from(profileUrl.get().getUrl(), participant);
+                return CreateMatchParticipantResponse.Participant.from(user.getName(), profileUrl.get().getUrl(), participant);
             } else {
-                return CreateMatchParticipantResponse.Participant.from(null, participant);
+                return CreateMatchParticipantResponse.Participant.from(user.getName(), null, participant);
             }
         } else {
-            return CreateMatchParticipantResponse.Participant.from(null, participant);
+            return CreateMatchParticipantResponse.Participant.from(user.getName(), null, participant);
         }
     }
 

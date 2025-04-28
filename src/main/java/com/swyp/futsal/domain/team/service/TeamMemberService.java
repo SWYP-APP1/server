@@ -102,6 +102,7 @@ public class TeamMemberService {
                     .profileUrl(getProfileUrl(user.getProfileUri()))
                     .gender(user.getGender())
                     .status(teamMember.getStatus())
+                    .squadNumber(Optional.ofNullable(user.getSquadNumber()))
                     .createdTime(teamMember.getCreatedTime())
                     .build();
             })
@@ -209,6 +210,25 @@ public class TeamMemberService {
         }
 
         teamMemberRepository.updateRoleById(requestedTeamMemberId, newRole);
+    }
+
+    @Transactional
+    public void cancelTeamMember(String userId, String teamMemberId) {
+        Tuple result = teamMemberRepository.findOneWithTeamByUserAndIsDeletedFalse(userId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_TEAM_MEMBER_ID));
+
+        TeamMember teamMember = result.get(0, TeamMember.class);
+        Team team = result.get(1, Team.class);
+
+        if (teamMember.getId() != teamMemberId) {
+            logger.error("cancelTeamMember: Permission denied for userId={}, teamId={}", userId, team.getId());
+            throw new BusinessException(ErrorCode.UNAUTHORIZED_TO_REMOVE_TEAM_MEMBER);
+        }
+
+        if (teamMember.getRole().equals(TeamRole.TEAM_MEMBER) && teamMember.getStatus().equals(MemberStatus.PENDING)) {
+            logger.info("Delete team member");
+            teamMemberRepository.deleteById(teamMemberId);
+        } 
     }
 
     @Transactional

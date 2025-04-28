@@ -31,12 +31,12 @@ public class CreateMatchParticipantResponse {
         private SubTeam subTeam;
         private LocalDateTime createdTime;
 
-        public static Participant from(String profileUrl, MatchParticipant participant) {
+        public static Participant from(String name, String profileUrl, MatchParticipant participant) {
             return Participant.builder()
                     .id(participant.getId())
                     .matchId(participant.getMatch().getId())
                     .teamMemberId(participant.getTeamMember().getId())
-                    .name(participant.getTeamMember().getName())
+                    .name(name)
                     .role(participant.getTeamMember().getRole().name())
                     .profileUrl(profileUrl)
                     .subTeam(participant.getSubTeam())

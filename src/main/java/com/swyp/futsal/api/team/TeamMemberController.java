@@ -94,6 +94,16 @@ public class TeamMemberController {
         teamMemberService.updateMemberStatus(userId, id, MemberStatus.ACTIVE);
     }
 
+    @DeleteMapping("/{id}/cancel")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void exitTeamMember(
+        @RequestHeader("Authorization") String authorization,
+        @PathVariable String id
+    ) {
+        String userId = getUserIdByHeader(authorization);
+        teamMemberService.cancelTeamMember(userId, id);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTeamMember(
