@@ -11,4 +11,5 @@ public interface TeamRepositoryCustom {
     List<Tuple> findAllWithLeaderByNameContaining(String name);
     boolean existsTeamByName(String name);
     void updateLogoById(String id, String uri);
+    void updateAllById(String id, String name, String introduction, String rule, MatchType matchType, TeamRole access, Integer dues);
 }

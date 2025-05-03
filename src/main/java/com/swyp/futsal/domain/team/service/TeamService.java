@@ -4,6 +4,7 @@ import com.querydsl.core.Tuple;
 import com.swyp.futsal.api.team.dto.CreateTeamRequest;
 import com.swyp.futsal.api.team.dto.GetMyTeamResponse;
 import com.swyp.futsal.api.team.dto.TeamSearchResponse;
+import com.swyp.futsal.api.team.dto.UpdateTeamRequest;
 import com.swyp.futsal.domain.common.enums.MemberStatus;
 import com.swyp.futsal.domain.common.enums.TeamRole;
 import com.swyp.futsal.domain.team.entity.Team;
@@ -147,6 +148,15 @@ public class TeamService {
                     );
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateTeamById(String userId, String teamId, UpdateTeamRequest request) {
+        if (!isTeamUpdateAccessable(userId, teamId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
+        }
+
+        teamRepository.updateAllById(teamId, request.getName(), request.getDescription(), request.getRule(), request.getMatchType(), request.getAccess(), request.getDues());
     }
 
     private void createTeamMember(Team team, User user) {

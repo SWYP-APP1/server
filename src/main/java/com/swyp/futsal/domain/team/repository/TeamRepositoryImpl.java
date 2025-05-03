@@ -53,4 +53,16 @@ public class TeamRepositoryImpl implements TeamRepositoryCustom {
                 .execute();
     }
 
+    @Override
+    public void updateAllById(String id, String name, String introduction, String rule, MatchType matchType, TeamRole access, Integer dues) {
+        queryFactory
+                .update(team)
+                .set(team.name, name)
+                .set(team.introduction, introduction)
+                .set(team.rule, rule)
+                .set(team.matchType, matchType)
+                .set(team.access, access)
+                .set(team.dues, dues)
+                .execute();
+    }
 }

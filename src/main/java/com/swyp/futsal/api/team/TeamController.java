@@ -5,6 +5,7 @@ import com.swyp.futsal.api.team.dto.GetMyTeamResponse;
 import com.swyp.futsal.api.team.dto.TeamResponse;
 import com.swyp.futsal.api.team.dto.TeamSearchResponse;
 import com.swyp.futsal.api.team.dto.UpdateTeamLogoRequest;
+import com.swyp.futsal.api.team.dto.UpdateTeamRequest;
 import com.swyp.futsal.domain.auth.AuthService;
 import com.swyp.futsal.domain.team.entity.Team;
 import com.swyp.futsal.domain.team.service.TeamService;
@@ -62,6 +63,16 @@ public class TeamController {
             @RequestBody UpdateTeamLogoRequest request) {
         String userId = getUserIdByHeader(authorization);
         return ApiResponse.success(teamService.updateTeamLogoById(userId, teamId, request.getUri()));
+    }
+
+    @PatchMapping("{teamId}")
+    public ApiResponse<Void> updateTeam(
+            @RequestHeader("Authorization") String authorization,
+            @PathVariable String teamId,
+            @RequestBody UpdateTeamRequest request) {
+        String userId = getUserIdByHeader(authorization);
+        teamService.updateTeamById(userId, teamId, request);
+        return ApiResponse.success(null);
     }
 
     @GetMapping

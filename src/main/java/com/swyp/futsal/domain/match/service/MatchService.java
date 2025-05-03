@@ -84,7 +84,6 @@ public class MatchService {
     public MatchResponse updateAllById(String userId, String id, MatchUpdateRequest request) {
         Match match = validateTeamManagerRole(userId, id);
 
-        match.updateRounds(request.getRounds());
         match.updateMatchDate(request.getMatchDate());
         match.updateStartTime(request.getStartTime());
         match.updateEndTime(request.getEndTime());

@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Set;
 
 
 @Slf4j
@@ -52,8 +53,26 @@ public class MatchParticipantService {
         Match match = validateTeamManagerRole(userId, request.getMatchId());
 
         logger.info("Validated team manager role: match={}", match);
-        List<TeamMember> teamMembers = teamMemberRepository.findTeamMembersByTeamIdAndMemberIds(match.getTeam().getId(), request.getTeamMemberIds());
-        List<MatchParticipant> participants = matchParticipantRepository.saveAll(teamMembers.stream()
+
+        // 1. 이미 등록된 참가자 ID 조회
+        List<MatchParticipant> existingParticipants = matchParticipantRepository.findAllByMatchId(match.getId());
+        Set<String> alreadyRegisteredMemberIds = existingParticipants.stream()
+                .map(mp -> mp.getTeamMember().getId())
+                .collect(Collectors.toSet());
+
+        // 2. 새로 등록하려는 팀원 중 이미 등록된 사람 제외
+        List<String> toRegisterMemberIds = request.getTeamMemberIds().stream()
+                .filter(id -> !alreadyRegisteredMemberIds.contains(id))
+                .collect(Collectors.toList());
+
+        if (toRegisterMemberIds.isEmpty()) {
+            logger.info("No new participants to register.");
+            return createMatchParticipantResponse(existingParticipants);
+        }
+
+        // 3. 실제 등록
+        List<TeamMember> teamMembers = teamMemberRepository.findTeamMembersByTeamIdAndMemberIds(match.getTeam().getId(), toRegisterMemberIds);
+        List<MatchParticipant> newParticipants = matchParticipantRepository.saveAll(teamMembers.stream()
                 .map(member -> MatchParticipant.builder()
                         .match(match)
                         .teamMember(member)
@@ -62,7 +81,11 @@ public class MatchParticipantService {
                         .build())
                 .collect(Collectors.toList()));
 
-        return createMatchParticipantResponse(participants);
+        // 4. 전체 참가자 목록 반환
+        List<MatchParticipant> allParticipants = new ArrayList<>(existingParticipants);
+        allParticipants.addAll(newParticipants);
+
+        return createMatchParticipantResponse(allParticipants);
     }
 
     @Transactional

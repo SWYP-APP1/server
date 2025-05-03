@@ -225,9 +225,13 @@ public class TeamMemberService {
             throw new BusinessException(ErrorCode.UNAUTHORIZED_TO_REMOVE_TEAM_MEMBER);
         }
 
-        if (teamMember.getRole().equals(TeamRole.TEAM_MEMBER) && teamMember.getStatus().equals(MemberStatus.PENDING)) {
-            logger.info("Delete team member");
-            teamMemberRepository.deleteById(teamMemberId);
+        if (teamMember.getRole().equals(TeamRole.TEAM_MEMBER)) {
+            if (teamMember.getStatus().equals(MemberStatus.PENDING)) {
+                logger.info("Delete team member");
+                teamMemberRepository.deleteById(teamMemberId);
+            } else {
+                teamMemberRepository.updateStatusByIdAndRole(teamMemberId, TeamRole.TEAM_MEMBER, MemberStatus.DELETED);
+            }
         } 
     }
 
