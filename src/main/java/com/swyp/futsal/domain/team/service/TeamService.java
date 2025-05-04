@@ -156,7 +156,7 @@ public class TeamService {
             throw new BusinessException(ErrorCode.FORBIDDEN_TEAM_LEADER_PERMISSION_REQUIRED);
         }
 
-        teamRepository.updateAllById(teamId, request.getName(), request.getDescription(), request.getRule(), request.getMatchType(), request.getAccess(), request.getDues());
+        teamRepository.updateAllById(teamId, request.getName(), request.getIntroduction(), request.getRule(), request.getMatchType(), request.getAccess(), request.getDues());
     }
 
     private void createTeamMember(Team team, User user) {

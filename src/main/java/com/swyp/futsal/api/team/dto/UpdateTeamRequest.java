@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public class UpdateTeamRequest {
     private String name;
-    private String description;
+    private String introduction;
     private String rule;
     private MatchType matchType;
     private TeamRole access;
